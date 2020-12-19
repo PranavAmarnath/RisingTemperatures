@@ -163,14 +163,10 @@ public class View {
 		
 	}
 	
+	@SuppressWarnings("serial")
 	static void showGUIAfterRead() {
 		tableData = new JTable(readObject.getModel()) {
 			
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 2880622079707377886L;
-
 			public boolean isCellEditable(int row, int column) {  
 				return false;
 			}
