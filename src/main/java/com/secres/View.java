@@ -90,7 +90,7 @@ public class View {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				tableData.setToolTipText("Display of CSV Data in Table format.\nDouble-click on a cell to copy text.\n Press CTRL+C to copy the whole row.");
+				tableData.setToolTipText("Display of CSV Data in Table format.\nDouble-click on a cell to copy text.\nPress CTRL+C to copy the whole row.");
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
@@ -173,7 +173,7 @@ public class View {
 			
 		};
 		
-		if(System.getProperty("os.name").toString().contains("mac")) {
+		if(System.getProperty("os.name").toString().contains("Mac")) {
 			try {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				tableData.setToolTipText("Display of CSV Data in Table format.\n Double-click on a cell to copy text.\n Press CTRL+C to copy the whole row.");
@@ -239,6 +239,10 @@ public class View {
         root.add(tableNode);
         
         return root;
+	}
+	
+	public JFrame getFrame() {
+		return frame;
 	}
 	
 }

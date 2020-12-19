@@ -14,23 +14,25 @@ public class Main {
 		///*
 		System.setProperty("apple.laf.useScreenMenuBar", "true"); // for picky mac users
 		System.setProperty("apple.awt.application.name", "Secres"); // mac header on mac menubar
-		if(System.getProperty("os.name").toString().contains("mac")) {
+		if(System.getProperty("os.name").toString().contains("Mac")) {
 			try {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				
-				Desktop desktop = Desktop.getDesktop();
-
-		        desktop.setAboutHandler(e ->
-		            JOptionPane.showMessageDialog(null, "About dialog")
-		        );
-		        desktop.setPreferencesHandler(e ->
-		            JOptionPane.showMessageDialog(null, "Preferences dialog")
-		        );
-		        desktop.setQuitHandler((e,r) -> {
-		                JOptionPane.showMessageDialog(null, "Quit dialog");
-		                System.exit(0);
-		            }
-		        );
+				SwingUtilities.invokeLater(() -> {
+					Desktop desktop = Desktop.getDesktop();
+					
+			        desktop.setAboutHandler(e ->
+			            JOptionPane.showMessageDialog(null, "About dialog")
+			        );
+			        desktop.setPreferencesHandler(e ->
+			            JOptionPane.showMessageDialog(null, "Preferences dialog")
+			        );
+			        desktop.setQuitHandler((e,r) -> {
+			                JOptionPane.showMessageDialog(null, "Quit dialog");
+			                System.exit(0);
+			            }
+			        );
+				});
 			} catch (Exception e) { e.printStackTrace(); }
 		}
 		else {
