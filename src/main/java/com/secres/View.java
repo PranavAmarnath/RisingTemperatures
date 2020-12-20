@@ -159,7 +159,7 @@ public class View {
         DefaultTableModel model = new DefaultTableModel(data, header);
         // end citation */
 		
-		readObject = new ReadData();
+		readObject = new ReadData("/MissingMigrants.csv");
 		
 	}
 	

@@ -15,10 +15,10 @@ public class ReadData {
 	private Object[] header;
 	List<String[]> myEntries;
 	
-	public ReadData() {
+	public ReadData(String path) {
 		new SwingWorker<Void, Void>() {
 			protected Void doInBackground() {
-				CSVReader reader = new CSVReader(new InputStreamReader(getClass().getResourceAsStream("/MissingMigrants.csv")));
+				CSVReader reader = new CSVReader(new InputStreamReader(getClass().getResourceAsStream(path)));
 				try {
 					myEntries = reader.readAll();
 					header = (String[]) myEntries.get(0);
