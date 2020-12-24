@@ -1,31 +1,18 @@
 package com.secres;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URL;
 
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTable;
-import javax.swing.JTree;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -34,36 +21,53 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 public class View {
 
-	private static JFrame frame;
-	private static JPanel mainPanel;
-	private static JPanel treePanel;
-	private static JPanel graphPanel;
-	private static JPanel cardsPanel;
-	private static JPanel emptyPanel;
-	private static JPanel tablePanel;
-	private final static String EMPTYPANEL = "Card that is empty";
-	private final static String TABLEPANEL = "Card with Data Table";
-	private static JSplitPane splitPane;
+	private JFrame frame;
+	private JPanel mainPanel;
+	private JPanel treePanel;
+	private JPanel graphPanel;
+	private JPanel cardsPanel;
+	private JPanel emptyPanel;
+	private JPanel tablePanel;
+	private final String EMPTYPANEL = "Card that is empty";
+	private final String TABLEPANEL = "Card with Data Table";
+	private JSplitPane splitPane;
 	private JScrollPane treeScroll;
-	private static JScrollPane tableScroll;
+	private JScrollPane tableScroll;
 	private JTree componentTree;
 	private DefaultMutableTreeNode root, tableNode;
-	private static JTable tableData;
+	private JTable tableData;
 	private JMenuBar menuBar;
 	private JMenu view;
 	private JMenuItem light, dark, system;
 	private FlatLightLaf lightLaf = new FlatLightLaf();
 	private FlatDarkLaf darkLaf = new FlatDarkLaf();
-	private static ReadData readObject;
 	
-	public View() {
-		createAndShowGUI();
+	public View(DefaultTableModel tableModel) {
+		createAndShowGUI(tableModel);
 	}
 	
-	public void createAndShowGUI() {
+	private void createAndShowGUI(DefaultTableModel tableModel) {
 		frame = new JFrame("Secres GUI");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
+		// taken from https://stackoverflow.com/a/56924202/13772184
+		// loading an image from a file
+		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
+		URL imageResource = View.class.getResource("/gear.png"); // URL: https://cdn.pixabay.com/photo/2012/05/04/10/57/gear-47203_1280.png
+		Image image = defaultToolkit.getImage(imageResource);
+
+		// this is new since JDK 9
+		Taskbar taskbar = Taskbar.getTaskbar();
+
+		try {
+			// set icon for mac os (and other systems which do support this method)
+			taskbar.setIconImage(image);
+		} catch (UnsupportedOperationException e) {
+			// set icon for windows (and other systems which do support this method)
+			frame.setIconImage(image);
+		}
+		// end citation
+
 		menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
 		view = new JMenu("View");
@@ -159,14 +163,13 @@ public class View {
         DefaultTableModel model = new DefaultTableModel(data, header);
         // end citation */
 		
-		readObject = new ReadData("/MissingMigrants.csv");
-		
-	}
-	
-	@SuppressWarnings("serial")
-	static void showGUIAfterRead() {
-		tableData = new JTable(readObject.getModel()) {
+		tableData = new JTable(tableModel) {
 			
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public boolean isCellEditable(int row, int column) {  
 				return false;
 			}
@@ -212,8 +215,14 @@ public class View {
 		
 		tablePanel.add(tableScroll);
 		
-		emptyPanel = new JPanel();
+		emptyPanel = new JPanel(new BorderLayout());
+		//emptyPanel.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220), 1));
 		//emptyPanel.setBackground(Color.WHITE);
+		JLabel emptyLabel = new JLabel("Click nodes on the left to display items.", JLabel.CENTER);
+		emptyLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
+		emptyLabel.setForeground(new Color(150, 150, 150));
+		emptyPanel.add(emptyLabel);
+		
 		cardsPanel.add(emptyPanel, EMPTYPANEL);
 		cardsPanel.add(tablePanel, TABLEPANEL);
 		CardLayout cl = (CardLayout)(cardsPanel.getLayout());
@@ -228,7 +237,6 @@ public class View {
 		splitPane.setResizeWeight(0.25);
 		splitPane.setDividerLocation(0.25);
 		frame.setLocationByPlatform(true);
-		frame.setVisible(true);
 	}
 	
 	private DefaultMutableTreeNode setTreeModel() {
