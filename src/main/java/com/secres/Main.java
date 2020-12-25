@@ -1,6 +1,8 @@
 package com.secres;
 
 import java.awt.*;
+import java.net.URL;
+
 import javax.swing.*;
 import com.formdev.flatlaf.*;
 
@@ -11,7 +13,20 @@ public class Main {
 	private static JWindow splash;
 	
 	public Main() {
+		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
+		URL imageResource = View.class.getResource("/gear.png"); // URL: https://cdn.pixabay.com/photo/2012/05/04/10/57/gear-47203_1280.png
+		Image image = defaultToolkit.getImage(imageResource);
+
+		Taskbar taskbar = Taskbar.getTaskbar();
+
 		initSplash();
+		
+		try {
+			taskbar.setIconImage(image);
+		} catch (UnsupportedOperationException e) {
+			splash.setIconImage(image);
+		}
+		
 		model = new Model("/MissingMigrants.csv");
 		/*
 		// For fixed splash time (5 seconds) irrespective of finished parsing through data -> ..
