@@ -231,6 +231,7 @@ public class View {
 		graphPanel.add(cardsPanel);
 		
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePanel, graphPanel);
+		splitPane.setContinuousLayout(true);
 		mainPanel.add(splitPane);
 		
 		frame.pack();
