@@ -17,11 +17,10 @@ public class Main {
 		URL imageResource = View.class.getResource("/gear.png"); // URL: https://cdn.pixabay.com/photo/2012/05/04/10/57/gear-47203_1280.png
 		Image image = defaultToolkit.getImage(imageResource);
 
-		Taskbar taskbar = Taskbar.getTaskbar();
-
 		initSplash();
 		
 		try {
+			Taskbar taskbar = Taskbar.getTaskbar();
 			taskbar.setIconImage(image);
 		} catch (UnsupportedOperationException e) {
 			splash.setIconImage(image);

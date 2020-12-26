@@ -56,10 +56,9 @@ public class View {
 		URL imageResource = View.class.getResource("/gear.png"); // URL: https://cdn.pixabay.com/photo/2012/05/04/10/57/gear-47203_1280.png
 		Image image = defaultToolkit.getImage(imageResource);
 
-		// this is new since JDK 9
-		Taskbar taskbar = Taskbar.getTaskbar();
-
 		try {
+			// this is new since JDK 9
+			Taskbar taskbar = Taskbar.getTaskbar();
 			// set icon for mac os (and other systems which do support this method)
 			taskbar.setIconImage(image);
 		} catch (UnsupportedOperationException e) {
