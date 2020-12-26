@@ -78,10 +78,8 @@ public class View {
 				try {
 					UIManager.setLookAndFeel(lightLaf);
 				} catch (UnsupportedLookAndFeelException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				tableData.setToolTipText("Display of CSV Data in Table format.\nDouble-click on a cell to copy text.\nPress CTRL+C to copy the whole row.");
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
@@ -91,10 +89,8 @@ public class View {
 				try {
 					UIManager.setLookAndFeel(darkLaf);
 				} catch (UnsupportedLookAndFeelException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				tableData.setToolTipText("Display of CSV Data in Table format.\nDouble-click on a cell to copy text.\nPress CTRL+C to copy the whole row.");
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
@@ -108,8 +104,9 @@ public class View {
 				}
 				try {
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-					tableData.setToolTipText("Display of CSV Data in Table format.\n Double-click on a cell to copy text.\n Press CTRL+C to copy the whole row.");
-				} catch (Exception e3) { e3.printStackTrace(); }
+				} catch (Exception e3) {
+					e3.printStackTrace();
+				}
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
@@ -179,14 +176,15 @@ public class View {
 		if(System.getProperty("os.name").toString().contains("Mac")) {
 			try {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				tableData.setToolTipText("Display of CSV Data in Table format.\n Double-click on a cell to copy text.\n Press CTRL+C to copy the whole row.");
-			} catch (Exception e) { e.printStackTrace(); }
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		else {
 			FlatLightLaf.install();
-			tableData.setToolTipText("Display of CSV Data in Table format.\nDouble-click on a cell to copy text.\nPress CTRL+C to copy the whole row.");
 		}
 		
+		/*
         tableData.addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {
@@ -203,6 +201,7 @@ public class View {
 		        }
 		    }
 		});
+		*/
 		
 		tableScroll = new JScrollPane(tableData);
 		//tableScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
