@@ -4,8 +4,10 @@ import com.opencsv.*;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
+import java.util.*;
 
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 
@@ -13,27 +15,77 @@ public class Model {
 
 	private DefaultTableModel model;
 	private Object[] header;
-	private List<String[]> myEntries;
+	//private List<String[]> myEntries = new ArrayList<>();
+	private CSVReader reader;
+	private String[] line;
 	
 	public Model(String path) {
-		new SwingWorker<Void, Void>() {
+		new SwingWorker<Void, Object[]>() {
 			protected Void doInBackground() {
-				CSVReader reader = new CSVReader(new InputStreamReader(getClass().getResourceAsStream(path)));
+				reader = new CSVReader(new InputStreamReader(getClass().getResourceAsStream(path)));
+				/*
 				try {
 					myEntries = reader.readAll();
 					header = (String[]) myEntries.get(0);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				*/
+				try {
+					header = (String[]) reader.readNext();
+					SwingUtilities.invokeLater(() -> model = new DefaultTableModel(header, 0));
+					Main.verifyStartRead();
+					while((line = reader.readNext()) != null) {
+				        //myEntries.add(line);
+						//SwingUtilities.invokeAndWait(() -> model.addRow(line));
+						model.addRow(line);
+				        //model.fireTableDataChanged();
+				    }
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+				/*
+				try {
+					int i = 0;
+					header = (String[]) reader.readNext();
+					model = new DefaultTableModel(header, 0);
+					System.out.println(reader.readNext());
+					while((line = reader.readNext()) != null) {
+						myEntries.add(line);
+						int columnNumber = 0;
+						for (String thisCellValue : (String[])myEntries.get(i)) {
+							//publish();
+							model.addRow(line);
+							//model.setValueAt(thisCellValue, i-1, columnNumber);
+					    	columnNumber++;
+					    }
+						System.out.println(i);
+						i++;
+					}
+				} catch (CsvValidationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				*/
+				return null;
+			}
+			/*
+			protected void process(String thisCellValue, int i, int columnNumber) {
+		    	model.setValueAt(thisCellValue, i-1, columnNumber);
+			}
+			*/
+			protected void done() {
 				try {
 					reader.close();
+					Main.verifyReadFinished();
+					JOptionPane.showMessageDialog(View.getFrame(), "Finished loading data");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				return null;
-			}
-			protected void done() {
+				/*
 				model = new DefaultTableModel(header, myEntries.size()-1);
 				int rowCount = model.getRowCount();
 				for (int i = 1; i < (rowCount+1); i++) {
@@ -43,8 +95,9 @@ public class Model {
 				    	model.setValueAt(thiscellvalue, i-1, columnNumber);
 				    	columnNumber++;
 				    }
+				    System.out.println(i);
 				}
-				Main.verifyTableModelFinish();
+				*/
 			}
 		}.execute();
 	}

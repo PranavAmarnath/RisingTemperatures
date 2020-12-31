@@ -21,21 +21,26 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 public class View {
 
-	private JFrame frame;
+	private static JFrame frame;
+	
 	private JPanel mainPanel;
 	private JPanel treePanel;
 	private JPanel graphPanel;
 	private JPanel cardsPanel;
 	private JPanel emptyPanel;
 	private JPanel tablePanel;
+	
 	private final String EMPTYPANEL = "Card that is empty";
 	private final String TABLEPANEL = "Card with Data Table";
+	private final String ALLLINEPANEL = "Card with Basic Line Chart";
+	private final String AVGLINEPANEL = "Card with Average Temperature Line Chart";
+	
 	private JSplitPane splitPane;
 	private JScrollPane treeScroll;
 	private JScrollPane tableScroll;
 	private JTree componentTree;
-	private DefaultMutableTreeNode root, tableNode;
-	private JTable tableData;
+	private DefaultMutableTreeNode root, dataRootNode, firstTableNode, graphRootNode, basicLineNode, basicLineByYearNode;
+	private static JTable tableData;
 	private JMenuBar menuBar;
 	private JMenu view;
 	private JMenuItem light, dark, system;
@@ -47,7 +52,16 @@ public class View {
 	}
 	
 	private void createAndShowGUI(DefaultTableModel tableModel) {
-		frame = new JFrame("Secres GUI");
+		frame = new JFrame("Secres GUI") {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public Dimension getPreferredSize() {
+				return new Dimension(600, 500);
+			}
+		};
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		// taken from https://stackoverflow.com/a/56924202/13772184
@@ -126,10 +140,18 @@ public class View {
 			public void valueChanged(TreeSelectionEvent e) {
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) componentTree.getLastSelectedPathComponent();
 				componentTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-				if(node == tableNode) {
+				if(node == firstTableNode) {
 					//System.out.println("Table will be shown!");
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, TABLEPANEL);
+				}
+				else if(node == basicLineNode) {
+					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
+				    cl.show(cardsPanel, ALLLINEPANEL);
+				}
+				else if(node == basicLineByYearNode) {
+					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
+				    cl.show(cardsPanel, AVGLINEPANEL);
 				}
 				else {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
@@ -225,7 +247,10 @@ public class View {
 		cardsPanel.add(tablePanel, TABLEPANEL);
 		CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 	    cl.show(cardsPanel, EMPTYPANEL);
-	    
+		
+		cardsPanel.add(GraphCharts.basicLineChart(), ALLLINEPANEL);
+		cardsPanel.add(GraphCharts.basicLineChartByYear(), AVGLINEPANEL);
+		
 		graphPanel.add(cardsPanel);
 		
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePanel, graphPanel);
@@ -239,17 +264,29 @@ public class View {
 	}
 	
 	private DefaultMutableTreeNode setTreeModel() {
-		root = new DefaultMutableTreeNode("Data");
-        //create the child nodes
-        tableNode = new DefaultMutableTreeNode("Table");
-        //add the child nodes to the root node
-        root.add(tableNode);
+		root = new DefaultMutableTreeNode("Access");
+		dataRootNode = new DefaultMutableTreeNode("Data");
+		root.add(dataRootNode);
+		firstTableNode = new DefaultMutableTreeNode("Table 1");
+        dataRootNode.add(firstTableNode);
+        
+		graphRootNode = new DefaultMutableTreeNode("Graphs");
+		root.add(graphRootNode);
+		
+		basicLineNode = new DefaultMutableTreeNode("Basic Line Chart");
+		graphRootNode.add(basicLineNode);
+		basicLineByYearNode = new DefaultMutableTreeNode("LineChart By Year");
+		graphRootNode.add(basicLineByYearNode);
         
         return root;
 	}
 	
-	public JFrame getFrame() {
+	public static JFrame getFrame() {
 		return frame;
+	}
+	
+	public static JTable getTable() {
+		return tableData;
 	}
 	
 }

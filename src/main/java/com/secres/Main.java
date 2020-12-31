@@ -2,6 +2,8 @@ package com.secres;
 
 import java.awt.*;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.swing.*;
 import com.formdev.flatlaf.*;
@@ -26,7 +28,7 @@ public class Main {
 			splash.setIconImage(image);
 		}
 		
-		model = new Model("/MissingMigrants.csv");
+		model = new Model("/GlobalTemperatures.csv");
 		/*
 		// For fixed splash time (5 seconds) irrespective of finished parsing through data -> ..
 		// ..will not work always if model is not done by the time the worker ends, this depends on the data..
@@ -66,14 +68,38 @@ public class Main {
 		splash.setVisible(true);
 	}
 	
-	static void verifyTableModelFinish() {
+	static void verifyStartRead() {
 		createView();
 	}
 	
 	private static void createView() {
-		splash.dispose(); // statement to comment if going with worker option
+		//splash.dispose();
 		view = new View(model.getModel());
-		view.getFrame().setVisible(true); // statement to comment if going with worker option
+	}
+	
+	static void verifyReadFinished() {
+		/*// Placing Column 23 data into an ArrayList
+		Thread thread = new Thread(new Runnable() {
+			public void run() {
+				ArrayList<Object> list = new ArrayList<>();
+				//System.out.println(View.getTable().getModel().getRowCount());
+				for(int i = 0; i < View.getTable().getModel().getRowCount(); i++) {
+					//System.out.println(((String)View.getTable().getModel().getValueAt(i, 23)).length());
+					if(!(((String)View.getTable().getModel().getValueAt(i, 23)).equals(""))) {
+						list.add(View.getTable().getModel().getValueAt(i, 23)); // get the all row values at column index 23
+					}
+				}
+				//list.forEach(System.out::println);
+			}
+		});
+		thread.start();
+		*/
+		GraphCharts.updateDataBasicLineChart();
+		GraphCharts.updateDataBasicLineChartByYear();
+ 	}
+	
+	public static JWindow getSplash() {
+		return splash;
 	}
 	
 	public static void main(String[] args) {
@@ -94,7 +120,7 @@ public class Main {
 			            JOptionPane.showMessageDialog(null, "Preferences dialog")
 			        );
 			        desktop.setQuitHandler((e,r) -> {
-			                JOptionPane.showMessageDialog(null, "Quit dialog");
+			                JOptionPane.showConfirmDialog(View.getFrame(), "Are you sure you want to quit?");
 			                System.exit(0);
 			            }
 			        );
