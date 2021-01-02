@@ -34,12 +34,17 @@ public class View {
 	private final String TABLEPANEL = "Card with Data Table";
 	private final String ALLLINEPANEL = "Card with Basic Line Chart";
 	private final String AVGLINEPANEL = "Card with Average Temperature Line Chart";
+	private final String AVGSCATTERPANEL = "Card with Average Temperature Scatter Plot";
+	private final String DECSCATTERPANEL = "Card with Temperatures from December Scatter Plot";
+	private final String JUNSCATTERPANEL = "Card with Temperatures from June Scatter Plot";
 	
 	private JSplitPane splitPane;
 	private JScrollPane treeScroll;
 	private JScrollPane tableScroll;
 	private JTree componentTree;
-	private DefaultMutableTreeNode root, dataRootNode, firstTableNode, graphRootNode, basicLineNode, basicLineByYearNode;
+	private DefaultMutableTreeNode root, dataRootNode, firstTableNode;
+	private DefaultMutableTreeNode graphRootNode;
+	private DefaultMutableTreeNode globalNode, basicLineNode, basicLineByYearNode, basicScatterByYearNode, basicScatterCoolingDecNode, basicScatterCoolingJunNode;
 	private static JTable tableData;
 	private JMenuBar menuBar;
 	private JMenu view;
@@ -153,6 +158,18 @@ public class View {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, AVGLINEPANEL);
 				}
+				else if(node == basicScatterByYearNode) {
+					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
+				    cl.show(cardsPanel, AVGSCATTERPANEL);
+				}
+				else if(node == basicScatterCoolingDecNode) {
+					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
+				    cl.show(cardsPanel, DECSCATTERPANEL);
+				}
+				else if(node == basicScatterCoolingJunNode) {
+					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
+				    cl.show(cardsPanel, JUNSCATTERPANEL);
+				}
 				else {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, EMPTYPANEL);
@@ -169,7 +186,10 @@ public class View {
 		
 		tablePanel = new JPanel(new BorderLayout());
 		
-		/* // taken from Andrew Thompson's nested layout example: https://stackoverflow.com/a/5630271/13772184
+		/*
+		 * @see https://stackoverflow.com/a/5630271/13772184
+		 */
+		/*// Start citation
 		String[] header = {"Name", "Value"};
         String[] a = new String[0];
         String[] names = System.getProperties().stringPropertyNames().toArray(a);
@@ -248,8 +268,18 @@ public class View {
 		CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 	    cl.show(cardsPanel, EMPTYPANEL);
 		
-		cardsPanel.add(GraphCharts.basicLineChart(), ALLLINEPANEL);
+	    SwingUtilities.invokeLater(() -> {
+	    	cardsPanel.add(GraphCharts.basicLineChart(), ALLLINEPANEL);
+			cardsPanel.add(GraphCharts.basicLineChartByYear(), AVGLINEPANEL);
+			cardsPanel.add(GraphCharts.basicScatterPlotByYear(), AVGSCATTERPANEL);
+			cardsPanel.add(GraphCharts.basicScatterPlotCoolingDec(), DECSCATTERPANEL);
+			cardsPanel.add(GraphCharts.basicScatterPlotCoolingJun(), JUNSCATTERPANEL);
+	    });
+	    /*// Code below incorrectly synchronized
+	    cardsPanel.add(GraphCharts.basicLineChart(), ALLLINEPANEL);
 		cardsPanel.add(GraphCharts.basicLineChartByYear(), AVGLINEPANEL);
+		cardsPanel.add(GraphCharts.basicScatterPlotByYear(), AVGSCATTERPANEL);
+		*/
 		
 		graphPanel.add(cardsPanel);
 		
@@ -267,16 +297,24 @@ public class View {
 		root = new DefaultMutableTreeNode("Access");
 		dataRootNode = new DefaultMutableTreeNode("Data");
 		root.add(dataRootNode);
-		firstTableNode = new DefaultMutableTreeNode("Table 1");
+		firstTableNode = new DefaultMutableTreeNode("Global Data");
         dataRootNode.add(firstTableNode);
         
 		graphRootNode = new DefaultMutableTreeNode("Graphs");
 		root.add(graphRootNode);
 		
+		globalNode = new DefaultMutableTreeNode("Global Data Graphs");
 		basicLineNode = new DefaultMutableTreeNode("Basic Line Chart");
-		graphRootNode.add(basicLineNode);
-		basicLineByYearNode = new DefaultMutableTreeNode("LineChart By Year");
-		graphRootNode.add(basicLineByYearNode);
+		globalNode.add(basicLineNode);
+		basicLineByYearNode = new DefaultMutableTreeNode("Line Chart By Year");
+		globalNode.add(basicLineByYearNode);
+		basicScatterByYearNode = new DefaultMutableTreeNode("Scatter Plot By Year");
+		globalNode.add(basicScatterByYearNode);
+		basicScatterCoolingDecNode = new DefaultMutableTreeNode("Scatter Plot in December");
+		globalNode.add(basicScatterCoolingDecNode);
+		basicScatterCoolingJunNode = new DefaultMutableTreeNode("Scatter Plot in June");
+		globalNode.add(basicScatterCoolingJunNode);
+		graphRootNode.add(globalNode);
         
         return root;
 	}

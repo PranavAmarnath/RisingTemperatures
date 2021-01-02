@@ -37,7 +37,7 @@ public class Model {
 					Main.verifyStartRead();
 					while((line = reader.readNext()) != null) {
 				        //myEntries.add(line);
-						//SwingUtilities.invokeAndWait(() -> model.addRow(line));
+						//SwingUtilities.invokeLater(() -> model.addRow(line));
 						model.addRow(line);
 				        //model.fireTableDataChanged();
 				    }
@@ -80,7 +80,7 @@ public class Model {
 				try {
 					reader.close();
 					Main.verifyReadFinished();
-					JOptionPane.showMessageDialog(View.getFrame(), "Finished loading data");
+					//JOptionPane.showMessageDialog(View.getFrame(), "Finished loading data");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

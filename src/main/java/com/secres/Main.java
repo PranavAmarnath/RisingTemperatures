@@ -10,7 +10,7 @@ import com.formdev.flatlaf.*;
 
 public class Main {
 
-	private static Model model;
+	private static Model modelGlobal, modelCountry;
 	private static View view;
 	private static JWindow splash;
 	
@@ -28,7 +28,8 @@ public class Main {
 			splash.setIconImage(image);
 		}
 		
-		model = new Model("/GlobalTemperatures.csv");
+		modelGlobal = new Model("/GlobalTemperatures.csv");
+		//modelCountry = new Model("/GlobalLandTemperaturesByCountry.csv");
 		/*
 		// For fixed splash time (5 seconds) irrespective of finished parsing through data -> ..
 		// ..will not work always if model is not done by the time the worker ends, this depends on the data..
@@ -74,11 +75,11 @@ public class Main {
 	
 	private static void createView() {
 		//splash.dispose();
-		view = new View(model.getModel());
+		view = new View(modelGlobal.getModel());
 	}
 	
 	static void verifyReadFinished() {
-		/*// Placing Column 23 data into an ArrayList
+		/*// Placing Column 23 data into an ArrayList while avoiding empty data
 		Thread thread = new Thread(new Runnable() {
 			public void run() {
 				ArrayList<Object> list = new ArrayList<>();
@@ -94,8 +95,18 @@ public class Main {
 		});
 		thread.start();
 		*/
+		/*
+		SwingUtilities.invokeLater(() -> {
+			GraphCharts.updateDataBasicLineChart();
+			//GraphCharts.updateDataBasicLineChartByYear();
+			//GraphCharts.updateBasicScatterPlotByYear();
+			GraphCharts.updateDataBasicChartByYear();
+		});
+		*/
 		GraphCharts.updateDataBasicLineChart();
-		GraphCharts.updateDataBasicLineChartByYear();
+		GraphCharts.updateDataBasicChartByYear();
+		GraphCharts.updateScatterPlotCoolingDec();
+		GraphCharts.updateScatterPlotCoolingJun();
  	}
 	
 	public static JWindow getSplash() {
