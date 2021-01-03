@@ -18,6 +18,7 @@ public class Model {
 	//private List<String[]> myEntries = new ArrayList<>();
 	private CSVReader reader;
 	private String[] line;
+	private final String LASTDATASET = "/GlobalLandTemperaturesByCountry.csv";
 	
 	public Model(String path) {
 		new SwingWorker<Void, Object[]>() {
@@ -33,12 +34,25 @@ public class Model {
 				*/
 				try {
 					header = (String[]) reader.readNext();
-					SwingUtilities.invokeLater(() -> model = new DefaultTableModel(header, 0));
-					Main.verifyStartRead();
+					SwingUtilities.invokeAndWait(() -> model = new DefaultTableModel(header, 0)); // NOT invokeLater() because model HAS to be initialized immediately on EDT
+					if(path.equals(LASTDATASET)) { // final dataset
+						//System.out.println("Create View");
+						Main.verifyStartRead();
+					}
+					int count = 0;
 					while((line = reader.readNext()) != null) {
 				        //myEntries.add(line);
 						//SwingUtilities.invokeLater(() -> model.addRow(line));
-						model.addRow(line);
+						try {
+							synchronized(model) {
+								model.addRow(line);
+								count++;
+							}
+						} catch(Exception e) {
+							e.printStackTrace();
+							//System.out.println(count);
+						}
+						//System.out.println(line.toString());
 				        //model.fireTableDataChanged();
 				    }
 				} catch(Exception e) {
@@ -79,7 +93,18 @@ public class Model {
 			protected void done() {
 				try {
 					reader.close();
-					Main.verifyReadFinished();
+					//System.out.println("Finished model");
+					/*
+					if(path.equals("/GlobalTemperatures.csv")) {
+						Main.modelCountry = new Model("/GlobalLandTemperaturesByCountry.csv");
+					}
+					*/
+					if(path.equals(LASTDATASET)) { // final dataset
+						//System.out.println("Going to update graphs");
+						Main.verifyReadFinished();
+						//Main.getSplash().dispose();
+						//View.getFrame().setVisible(true);
+					}
 					//JOptionPane.showMessageDialog(View.getFrame(), "Finished loading data");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

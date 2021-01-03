@@ -10,7 +10,7 @@ import com.formdev.flatlaf.*;
 
 public class Main {
 
-	private static Model modelGlobal, modelCountry;
+	static Model modelGlobal, modelCountry;
 	private static View view;
 	private static JWindow splash;
 	
@@ -29,7 +29,7 @@ public class Main {
 		}
 		
 		modelGlobal = new Model("/GlobalTemperatures.csv");
-		//modelCountry = new Model("/GlobalLandTemperaturesByCountry.csv");
+		modelCountry = new Model("/GlobalLandTemperaturesByCountry.csv");
 		/*
 		// For fixed splash time (5 seconds) irrespective of finished parsing through data -> ..
 		// ..will not work always if model is not done by the time the worker ends, this depends on the data..
@@ -75,7 +75,7 @@ public class Main {
 	
 	private static void createView() {
 		//splash.dispose();
-		view = new View(modelGlobal.getModel());
+		view = new View();
 	}
 	
 	static void verifyReadFinished() {
@@ -103,10 +103,18 @@ public class Main {
 			GraphCharts.updateDataBasicChartByYear();
 		});
 		*/
+		
 		GraphCharts.updateDataBasicLineChart();
 		GraphCharts.updateDataBasicChartByYear();
 		GraphCharts.updateScatterPlotCoolingDec();
 		GraphCharts.updateScatterPlotCoolingJun();
+		new SwingWorker<Void, Void>() {
+			protected Void doInBackground() throws Exception {
+				GraphCharts.updateBasicBarChartByCountry();
+				return null;
+			}
+		}.execute();
+		
  	}
 	
 	public static JWindow getSplash() {

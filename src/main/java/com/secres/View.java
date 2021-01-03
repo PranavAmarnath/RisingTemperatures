@@ -28,48 +28,49 @@ public class View {
 	private JPanel graphPanel;
 	private JPanel cardsPanel;
 	private JPanel emptyPanel;
-	private JPanel tablePanel;
+	private JPanel tableGlobalPanel, tableCountryPanel;
 	
 	private final String EMPTYPANEL = "Card that is empty";
-	private final String TABLEPANEL = "Card with Data Table";
+	private final String TABLEGLOBALPANEL = "Card with Global Data Table";
+	private final String TABLECOUNTRYPANEL = "Card with Country Data Table";
+	
 	private final String ALLLINEPANEL = "Card with Basic Line Chart";
 	private final String AVGLINEPANEL = "Card with Average Temperature Line Chart";
 	private final String AVGSCATTERPANEL = "Card with Average Temperature Scatter Plot";
 	private final String DECSCATTERPANEL = "Card with Temperatures from December Scatter Plot";
 	private final String JUNSCATTERPANEL = "Card with Temperatures from June Scatter Plot";
+	private final String AVGBARPANEL = "Card with Average Temperature Bar Chart";
 	
 	private JSplitPane splitPane;
 	private JScrollPane treeScroll;
-	private JScrollPane tableScroll;
+	private JScrollPane tableGlobalScroll, tableCountryScroll;
 	private JTree componentTree;
-	private DefaultMutableTreeNode root, dataRootNode, firstTableNode;
+	private DefaultMutableTreeNode root, dataRootNode, globalTableNode, countryTableNode;
 	private DefaultMutableTreeNode graphRootNode;
 	private DefaultMutableTreeNode globalNode, basicLineNode, basicLineByYearNode, basicScatterByYearNode, basicScatterCoolingDecNode, basicScatterCoolingJunNode;
-	private static JTable tableData;
+	private DefaultMutableTreeNode countryNode, basicBarNode;
+	private static JTable tableGlobalData, tableCountryData;
 	private JMenuBar menuBar;
 	private JMenu view;
 	private JMenuItem light, dark, system;
 	private FlatLightLaf lightLaf = new FlatLightLaf();
 	private FlatDarkLaf darkLaf = new FlatDarkLaf();
 	
-	public View(DefaultTableModel tableModel) {
-		createAndShowGUI(tableModel);
+	public View() {
+		createAndShowGUI();
 	}
 	
-	private void createAndShowGUI(DefaultTableModel tableModel) {
+	private void createAndShowGUI() {
 		frame = new JFrame("Secres GUI") {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
 			public Dimension getPreferredSize() {
-				return new Dimension(600, 500);
+				return new Dimension(800, 600);
 			}
 		};
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		// taken from https://stackoverflow.com/a/56924202/13772184
+		/*
+		 * @see https://stackoverflow.com/a/56924202/13772184
+		 */
 		// loading an image from a file
 		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
 		URL imageResource = View.class.getResource("/gear.png"); // URL: https://cdn.pixabay.com/photo/2012/05/04/10/57/gear-47203_1280.png
@@ -145,10 +146,15 @@ public class View {
 			public void valueChanged(TreeSelectionEvent e) {
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) componentTree.getLastSelectedPathComponent();
 				componentTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-				if(node == firstTableNode) {
+				if(node == globalTableNode) {
 					//System.out.println("Table will be shown!");
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
-				    cl.show(cardsPanel, TABLEPANEL);
+				    cl.show(cardsPanel, TABLEGLOBALPANEL);
+				}
+				else if(node == countryTableNode) {
+					//System.out.println("Table will be shown!");
+					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
+				    cl.show(cardsPanel, TABLECOUNTRYPANEL);
 				}
 				else if(node == basicLineNode) {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
@@ -170,6 +176,10 @@ public class View {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, JUNSCATTERPANEL);
 				}
+				else if(node == basicBarNode) {
+					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
+				    cl.show(cardsPanel, AVGBARPANEL);
+				}
 				else {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, EMPTYPANEL);
@@ -184,7 +194,8 @@ public class View {
 		cardsPanel = new JPanel(new CardLayout());
 		//cardsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
-		tablePanel = new JPanel(new BorderLayout());
+		tableGlobalPanel = new JPanel(new BorderLayout());
+		tableCountryPanel = new JPanel(new BorderLayout());
 		
 		/*
 		 * @see https://stackoverflow.com/a/5630271/13772184
@@ -201,18 +212,18 @@ public class View {
         DefaultTableModel model = new DefaultTableModel(data, header);
         // end citation */
 		
-		tableData = new JTable(tableModel) {
-			
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
+		tableGlobalData = new JTable(Main.modelGlobal.getModel()) {
 			public boolean isCellEditable(int row, int column) {  
 				return false;
 			}
-			
 		};
+		
+		tableCountryData = new JTable(Main.modelCountry.getModel()) {
+			public boolean isCellEditable(int row, int column) {  
+				return false;
+			}
+		};
+		//System.out.println("Reached second table.");
 		
 		if(System.getProperty("os.name").toString().contains("Mac")) {
 			try {
@@ -225,16 +236,16 @@ public class View {
 			FlatLightLaf.install();
 		}
 		
-		/*
-        tableData.addMouseListener(new MouseAdapter() {
+		///*
+        tableGlobalData.addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {
 		        if (e.getClickCount() == 2) { //e.getClickCount() == 2 -> double-click
 		            //System.out.println("right click");
 		            Point p = e.getPoint();
-		            int row = tableData.rowAtPoint(p);
-		            int col = tableData.columnAtPoint(p);
-		            Object value = tableData.getValueAt(row, col);
+		            int row = tableGlobalData.rowAtPoint(p);
+		            int col = tableGlobalData.columnAtPoint(p);
+		            Object value = tableGlobalData.getValueAt(row, col);
 		            StringSelection stringSelection = new StringSelection(value.toString());
 		            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		            clipboard.setContents(stringSelection, stringSelection);
@@ -242,18 +253,38 @@ public class View {
 		        }
 		    }
 		});
-		*/
+        tableCountryData.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		        if (e.getClickCount() == 2) { //e.getClickCount() == 2 -> double-click
+		            //System.out.println("right click");
+		            Point p = e.getPoint();
+		            int row = tableCountryData.rowAtPoint(p);
+		            int col = tableCountryData.columnAtPoint(p);
+		            Object value = tableCountryData.getValueAt(row, col);
+		            StringSelection stringSelection = new StringSelection(value.toString());
+		            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		            clipboard.setContents(stringSelection, stringSelection);
+		            JOptionPane.showMessageDialog(frame, "Copied text!\nHover the mouse over the table for more info.");
+		        }
+		    }
+		});
+		//*/
 		
-		tableScroll = new JScrollPane(tableData);
-		//tableScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		tableGlobalScroll = new JScrollPane(tableGlobalData);
+		//tableGlobalScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		tableCountryScroll = new JScrollPane(tableCountryData);
 		
-		// Customization of JTable
-		tableData.setAutoCreateRowSorter(true);
-		tableData.setAutoResizeMode(0);
-		tableData.getTableHeader().setReorderingAllowed(false);
-		// End customization
+		tableGlobalData.setAutoCreateRowSorter(true);
+		tableGlobalData.setAutoResizeMode(0);
+		tableGlobalData.getTableHeader().setReorderingAllowed(false);
 		
-		tablePanel.add(tableScroll);
+		tableCountryData.setAutoCreateRowSorter(true);
+		tableCountryData.setAutoResizeMode(0);
+		tableCountryData.getTableHeader().setReorderingAllowed(false);
+		
+		tableGlobalPanel.add(tableGlobalScroll);
+		tableCountryPanel.add(tableCountryScroll);
 		
 		emptyPanel = new JPanel(new BorderLayout());
 		//emptyPanel.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220), 1));
@@ -264,7 +295,8 @@ public class View {
 		emptyPanel.add(emptyLabel);
 		
 		cardsPanel.add(emptyPanel, EMPTYPANEL);
-		cardsPanel.add(tablePanel, TABLEPANEL);
+		cardsPanel.add(tableGlobalPanel, TABLEGLOBALPANEL);
+		cardsPanel.add(tableCountryPanel, TABLECOUNTRYPANEL);
 		CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 	    cl.show(cardsPanel, EMPTYPANEL);
 		
@@ -274,6 +306,7 @@ public class View {
 			cardsPanel.add(GraphCharts.basicScatterPlotByYear(), AVGSCATTERPANEL);
 			cardsPanel.add(GraphCharts.basicScatterPlotCoolingDec(), DECSCATTERPANEL);
 			cardsPanel.add(GraphCharts.basicScatterPlotCoolingJun(), JUNSCATTERPANEL);
+			cardsPanel.add(GraphCharts.basicBarChartByCountry(), AVGBARPANEL);
 	    });
 	    /*// Code below incorrectly synchronized
 	    cardsPanel.add(GraphCharts.basicLineChart(), ALLLINEPANEL);
@@ -297,8 +330,11 @@ public class View {
 		root = new DefaultMutableTreeNode("Access");
 		dataRootNode = new DefaultMutableTreeNode("Data");
 		root.add(dataRootNode);
-		firstTableNode = new DefaultMutableTreeNode("Global Data");
-        dataRootNode.add(firstTableNode);
+		
+		globalTableNode = new DefaultMutableTreeNode("Global Data");
+        dataRootNode.add(globalTableNode);
+        countryTableNode = new DefaultMutableTreeNode("Country Data");
+        dataRootNode.add(countryTableNode);
         
 		graphRootNode = new DefaultMutableTreeNode("Graphs");
 		root.add(graphRootNode);
@@ -310,10 +346,16 @@ public class View {
 		globalNode.add(basicLineByYearNode);
 		basicScatterByYearNode = new DefaultMutableTreeNode("Scatter Plot By Year");
 		globalNode.add(basicScatterByYearNode);
-		basicScatterCoolingDecNode = new DefaultMutableTreeNode("Scatter Plot in December");
+		basicScatterCoolingDecNode = new DefaultMutableTreeNode("Scatter Plot In December");
 		globalNode.add(basicScatterCoolingDecNode);
-		basicScatterCoolingJunNode = new DefaultMutableTreeNode("Scatter Plot in June");
+		basicScatterCoolingJunNode = new DefaultMutableTreeNode("Scatter Plot In June");
 		globalNode.add(basicScatterCoolingJunNode);
+		
+		countryNode = new DefaultMutableTreeNode("Country Data Graphs");
+		basicBarNode = new DefaultMutableTreeNode("Bar Chart By Country");
+		countryNode.add(basicBarNode);
+		
+		graphRootNode.add(countryNode);
 		graphRootNode.add(globalNode);
         
         return root;
@@ -323,8 +365,12 @@ public class View {
 		return frame;
 	}
 	
-	public static JTable getTable() {
-		return tableData;
+	public static JTable getGlobalTable() {
+		return tableGlobalData;
+	}
+	
+	public static JTable getCountryTable() {
+		return tableCountryData;
 	}
 	
 }
