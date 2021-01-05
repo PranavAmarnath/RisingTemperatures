@@ -242,6 +242,7 @@ public class View {
 		}
 		
 		///*
+		tableGlobalData.setToolTipText("<html>Display of CSV Data in Table format.<br>Double-click on a cell to copy text.<br>Press CTRL+C to copy row(s).</html>");
         tableGlobalData.addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {
@@ -258,6 +259,7 @@ public class View {
 		        }
 		    }
 		});
+		tableCountryData.setToolTipText("<html>Display of CSV Data in Table format.<br>Double-click on a cell to copy text.<br>Press CTRL+C to copy row(s).</html>");
         tableCountryData.addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {

@@ -1,6 +1,8 @@
 package com.secres;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +16,7 @@ public class Main {
 	private static View view;
 	private static JWindow splash;
 	private static JProgressBar pb;
+	private int seconds = 32;
 	
 	public Main() {
 		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
@@ -55,8 +58,25 @@ public class Main {
 		splash = new JWindow();
 		JPanel splashPanel = new JPanel(new BorderLayout());
 		
+		JPanel timePanel = new JPanel();
+		splashPanel.add(timePanel, BorderLayout.NORTH);
+		
 		JLabel img = new JLabel(icon);
 		splashPanel.add(img);
+		
+		JLabel estTime = new JLabel("Est. Time Remaining: " + seconds + " seconds...");
+		timePanel.add(estTime);
+		timePanel.setBackground(new Color(134, 169, 181));
+		Timer estTimer = new Timer(1000, new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				seconds--;
+				estTime.setText("Est. Time Remaining: " + seconds + " seconds...");
+				if(seconds == 0) {
+					((Timer)e.getSource()).stop();
+				}
+			}
+		});
+		estTimer.start();
 		
 		pb = new JProgressBar(JProgressBar.HORIZONTAL);
 		//pb.setIndeterminate(true);

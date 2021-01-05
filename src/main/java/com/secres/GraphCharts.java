@@ -6,6 +6,7 @@ import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;
+import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.CategoryItemLabelGenerator;
 import org.jfree.chart.labels.ItemLabelAnchor;
@@ -117,6 +118,7 @@ public class GraphCharts {
 		Map<String, Double> entries = new LinkedHashMap<>();
 		List<Double> entriesList = new ArrayList<>();
 		double average = 0;
+		int count = 0;
 		//List<Double> entriesAvg = new ArrayList<>();
 
 		/*
@@ -126,18 +128,17 @@ public class GraphCharts {
 			for(int j = 0; j < 12; j++) {
 				if((String)View.getGlobalTable().getModel().getValueAt(i+j, 1) != null && !((String)View.getGlobalTable().getModel().getValueAt(i+j, 1)).trim().isEmpty()) {
 					entries.put((String)View.getGlobalTable().getModel().getValueAt(i+j, 0), Double.parseDouble((String)View.getGlobalTable().getModel().getValueAt(i+j, 1)));
-				}
-				else {
-					continue;
+					//System.out.println("i: " + i + ", j: " + j);
 				}
 			}
 			//System.out.println(entries.size());
-			int count = 0;
+			count = 0;
 			for(int k = 0; k < entries.size(); k++) {
 				if((String)View.getGlobalTable().getModel().getValueAt(i+k, 1) != null && !((String)View.getGlobalTable().getModel().getValueAt(i+k, 1)).trim().isEmpty()) {
 					//entriesList.add(entries.get((String)View.getGlobalTable().getModel().getValueAt(i+k, 0)));
 					count++;
 					average = average + entries.get((String)View.getGlobalTable().getModel().getValueAt(i+k, 0));
+					//System.out.println("Year: " + (String)View.getGlobalTable().getModel().getValueAt(i+k, 0) + "Average: " + average);
 				}
 			}
 			//System.out.println(Arrays.toString(entriesList.toArray()));
@@ -152,6 +153,7 @@ public class GraphCharts {
 			// Start Scatter Plot
 			series.add(Integer.parseInt(((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4)), average); // add elements
 			// End Scatter Plot
+			average = 0;
 			entries.clear();
 			entriesList.clear();
 		}
@@ -358,7 +360,7 @@ public class GraphCharts {
 	static ChartPanel basicBarChartByCountry() {
 		datasetBasicBarChartByCountry = new DefaultCategoryDataset();
 
-		JFreeChart barChart = ChartFactory.createBarChart("Countries with Highest Overall Temperatures", "Country", "Average Temperature \u00B0C", datasetBasicBarChartByCountry, PlotOrientation.VERTICAL, false, true, false);
+		JFreeChart barChart = ChartFactory.createBarChart("Countries with Highest Overall Temperatures", "Country", "Average Temperature \u00B0C", datasetBasicBarChartByCountry, PlotOrientation.VERTICAL, true, true, false);
 
 		/*
 		 * @see https://stackoverflow.com/a/61398612/13772184
@@ -435,7 +437,7 @@ public class GraphCharts {
 		entriesAvg = sortByValueDescending(entriesAvg);
 		for(int i = 0; i < 10; i++) { // for sortByValueDescending()
 			if((entriesAvg.get((String)entriesAvg.keySet().toArray()[i])) < 100) { // Antarctica returns infinity because starts from 1950
-				datasetBasicBarChartByCountry.addValue(entriesAvg.get((String)entriesAvg.keySet().toArray()[i]), "Average temperature per year", (String)entriesAvg.keySet().toArray()[i]);
+				datasetBasicBarChartByCountry.addValue(entriesAvg.get((String)entriesAvg.keySet().toArray()[i]), "Average temperature", (String)entriesAvg.keySet().toArray()[i]);
 			}
 		}
 		/*
@@ -487,6 +489,13 @@ public class GraphCharts {
 		plot.setRangePannable(true);
 		//Font font = new Font("SansSerif", Font.BOLD, 15);
 		//plot.getDomainAxis().setTickLabelFont(font);
+		/*
+		 * Moves the range axis (temperature) to the bottom
+		 */
+		ValueAxis rangeAxis = plot.getRangeAxis();
+		plot.setRangeAxis(0, rangeAxis);
+		plot.mapDatasetToRangeAxis(0, 0);
+		plot.setRangeAxisLocation(0, AxisLocation.BOTTOM_OR_LEFT);
 		
 		CategoryItemRenderer renderer = plot.getRenderer(); 
 		CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator("{2}", NumberFormat.getInstance()); 
