@@ -40,6 +40,7 @@ public class View {
 	private final String DECSCATTERPANEL = "Card with Temperatures from December Scatter Plot";
 	private final String JUNSCATTERPANEL = "Card with Temperatures from June Scatter Plot";
 	private final String AVGBARPANEL = "Card with Average Temperature Bar Chart";
+	private final String DOUBLEBARPANEL = "Card with Most Difference in a century Bar Chart";
 	
 	private JSplitPane splitPane;
 	private JScrollPane treeScroll;
@@ -48,7 +49,7 @@ public class View {
 	private DefaultMutableTreeNode root, dataRootNode, globalTableNode, countryTableNode;
 	private DefaultMutableTreeNode graphRootNode;
 	private DefaultMutableTreeNode globalNode, basicLineNode, basicLineByYearNode, basicScatterByYearNode, basicScatterCoolingDecNode, basicScatterCoolingJunNode;
-	private DefaultMutableTreeNode countryNode, basicBarNode;
+	private DefaultMutableTreeNode countryNode, basicBarNode, doubleBarNode;
 	private static JTable tableGlobalData, tableCountryData;
 	private JMenuBar menuBar;
 	private JMenu view;
@@ -180,6 +181,10 @@ public class View {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, AVGBARPANEL);
 				}
+				else if(node == doubleBarNode) {
+					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
+				    cl.show(cardsPanel, DOUBLEBARPANEL);
+				}
 				else {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, EMPTYPANEL);
@@ -307,6 +312,7 @@ public class View {
 			cardsPanel.add(GraphCharts.basicScatterPlotCoolingDec(), DECSCATTERPANEL);
 			cardsPanel.add(GraphCharts.basicScatterPlotCoolingJun(), JUNSCATTERPANEL);
 			cardsPanel.add(GraphCharts.basicBarChartByCountry(), AVGBARPANEL);
+			cardsPanel.add(GraphCharts.doubleBarChartByCountry(), DOUBLEBARPANEL);
 	    });
 	    /*// Code below incorrectly synchronized
 	    cardsPanel.add(GraphCharts.basicLineChart(), ALLLINEPANEL);
@@ -354,6 +360,8 @@ public class View {
 		countryNode = new DefaultMutableTreeNode("Country Data Graphs");
 		basicBarNode = new DefaultMutableTreeNode("Bar Chart By Country");
 		countryNode.add(basicBarNode);
+		doubleBarNode = new DefaultMutableTreeNode("Double Bar Chart By Country");
+		countryNode.add(doubleBarNode);
 		
 		graphRootNode.add(countryNode);
 		graphRootNode.add(globalNode);

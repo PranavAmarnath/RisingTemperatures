@@ -5,6 +5,7 @@ import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.CategoryItemLabelGenerator;
 import org.jfree.chart.labels.ItemLabelAnchor;
@@ -43,7 +44,7 @@ public class GraphCharts {
 
 	private static DefaultCategoryDataset datasetBasicLineChart, datasetBasicLineChartByYear;
 	private static XYSeriesCollection datasetBasicScatterPlotByYear, datasetBasicScatterPlotCoolingDec, datasetBasicScatterPlotCoolingJun;
-	private static DefaultCategoryDataset datasetBasicBarChartByCountry;
+	private static DefaultCategoryDataset datasetBasicBarChartByCountry, datasetDoubleBarChartByCountry;
 	
 	static ChartPanel basicLineChart() {
 		datasetBasicLineChart = new DefaultCategoryDataset();
@@ -351,6 +352,7 @@ public class GraphCharts {
 		datasetBasicScatterPlotCoolingJun.addSeries(trend);
 		// End trend display
 		// End Scatter Plot
+		Main.getPB().setValue(Main.getPB().getValue() + 20);
 	}
 	
 	static ChartPanel basicBarChartByCountry() {
@@ -431,19 +433,20 @@ public class GraphCharts {
 			count = 0;
 		}
 		entriesAvg = sortByValueDescending(entriesAvg);
-		for(int i = 1; i <= 10; i++) { // for sortByValueDescending()
-			datasetBasicBarChartByCountry.addValue(entriesAvg.get((String)entriesAvg.keySet().toArray()[i]), "Average temperature per year", (String)entriesAvg.keySet().toArray()[i]);
+		for(int i = 0; i < 10; i++) { // for sortByValueDescending()
+			if((entriesAvg.get((String)entriesAvg.keySet().toArray()[i])) < 100) { // Antarctica returns infinity because starts from 1950
+				datasetBasicBarChartByCountry.addValue(entriesAvg.get((String)entriesAvg.keySet().toArray()[i]), "Average temperature per year", (String)entriesAvg.keySet().toArray()[i]);
+			}
 		}
 		/*
-		entriesAvg = sortByValueDescending(entriesAvg);
+		entriesAvg = sortByValue(entriesAvg);
 		for(int i = 0; i < 10; i++) { // for sortByValue()
 			datasetBasicBarChartByCountry.addValue(entriesAvg.get((String)entriesAvg.keySet().toArray()[i]), (String)entriesAvg.keySet().toArray()[i], (String)entriesAvg.keySet().toArray()[i]);
 		}
 		*/
-		
-		//System.out.println("Reached view visible.");
-		Main.getSplash().dispose();
-		View.getFrame().setVisible(true);
+		SwingUtilities.invokeLater(() -> {
+			Main.getPB().setValue(Main.getPB().getValue() + 20);
+		});
 	}
 	
 	/*
@@ -471,6 +474,146 @@ public class GraphCharts {
 
         return result;
     }
+	
+	static ChartPanel doubleBarChartByCountry() {
+		datasetDoubleBarChartByCountry = new DefaultCategoryDataset();
+
+		JFreeChart barChart = ChartFactory.createBarChart("Countries with Highest Change In Temperature Over a Century (1912-2012)", "Country", "Average Temperature \u00B0C", datasetDoubleBarChartByCountry, PlotOrientation.HORIZONTAL, true, true, false);
+
+		/*
+		 * @see https://stackoverflow.com/a/61398612/13772184
+		 */
+		CategoryPlot plot = barChart.getCategoryPlot();
+		plot.setRangePannable(true);
+		//Font font = new Font("SansSerif", Font.BOLD, 15);
+		//plot.getDomainAxis().setTickLabelFont(font);
+		
+		CategoryItemRenderer renderer = plot.getRenderer(); 
+		CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator("{2}", NumberFormat.getInstance()); 
+
+		renderer.setDefaultItemLabelGenerator(generator);
+		renderer.setDefaultItemLabelFont(new Font("SansSerif", Font.PLAIN, 12)); //just font change optional
+		renderer.setDefaultItemLabelsVisible(true);
+		/*
+		 * Default item label is above the bar. Use below method for inside bar.
+		 */
+		//renderer.setDefaultPositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.TOP_CENTER));
+
+		ChartPanel chartPanel = new ChartPanel(barChart);
+		chartPanel.setMouseWheelEnabled(true);
+
+		return chartPanel;
+	}
+	
+	static void updateDoubleBarChartByCountry() {
+		//List<Double> entriesList = new ArrayList<>();
+		double average = 0;
+		int count = 0;
+		double averageSecond = 0;
+		int countSecond = 0;
+		Map<String, Double> entriesAvg = new LinkedHashMap<>();
+		Map<String, Double> entriesAvgSecond = new LinkedHashMap<>();
+		Map<String, Double> entriesDifferences = new LinkedHashMap<>();
+		
+		/*// dummy data
+		datasetDoubleBarChartByCountry.addValue(10, "USA", "2005");
+		datasetDoubleBarChartByCountry.addValue(15, "India", "2005");
+		datasetDoubleBarChartByCountry.addValue(20, "China", "2005");
+		*/
+		
+		Set<String> set = new LinkedHashSet<>();
+		for(int i = 0; i<View.getCountryTable().getModel().getRowCount();i++){
+		    String obj = (String)View.getCountryTable().getModel().getValueAt(i, 3);
+		    if(!set.add(obj)){
+		        continue;
+		    }
+		}
+		for(Iterator<String> i = set.iterator(); i.hasNext(); ) {
+			String country = i.next();
+			for(int j = 0; j < View.getCountryTable().getModel().getRowCount(); j++) {
+				//System.out.println(View.getCountryTable().getModel().getValueAt(i, 3));
+				if(View.getCountryTable().getModel().getValueAt(j, 3).equals(country)) {
+					//System.out.println("Entered outer 'if'");
+					if((((String)View.getCountryTable().getModel().getValueAt(j, 0)).substring(0, 4)).equals("1912")) {
+						if((String)View.getCountryTable().getModel().getValueAt(j, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(j, 1)).trim().isEmpty()) {
+							count = count + 1;
+							average = average + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(j, 1));
+							//System.out.println(count);
+						}
+					}
+					else if((((String)View.getCountryTable().getModel().getValueAt(j, 0)).substring(0, 4)).equals("2012")) {
+						if((String)View.getCountryTable().getModel().getValueAt(j, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(j, 1)).trim().isEmpty()) {
+							countSecond = countSecond + 1;
+							averageSecond = averageSecond + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(j, 1));
+							//System.out.println(count);
+						}
+					}
+				}
+			}
+			//System.out.println(count);
+			/*
+			for(int k = 0; k < count; k++) {
+				if((String)View.getCountryTable().getModel().getValueAt(k, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(k, 1)).trim().isEmpty()) {
+					average = average + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(k, 1));
+				}
+			}
+			*/
+			//System.out.println(average);
+			average = average/count;
+			averageSecond = averageSecond/count;
+			//System.out.println(average);
+			entriesAvg.put(country, average);
+			entriesAvgSecond.put(country, averageSecond);
+			//datasetBasicBarChartByCountry.addValue(average, country, country);
+			//System.out.println(entriesList.size());
+			average = 0;
+			count = 0;
+			averageSecond = 0;
+			countSecond = 0;
+		}
+		for(int i = 0; i < entriesAvg.size(); i++) {
+			if((entriesAvgSecond.get((String)entriesAvgSecond.keySet().toArray()[i])) < 100) {
+				entriesDifferences.put((String)entriesAvgSecond.keySet().toArray()[i], entriesAvgSecond.get((String)entriesAvgSecond.keySet().toArray()[i]) - entriesAvg.get((String)entriesAvg.keySet().toArray()[i]));
+			}
+		}
+		entriesDifferences = sortByValueDescending(entriesDifferences);
+		entriesAvg = sortByValueDescending(entriesAvg);
+		entriesAvgSecond = sortByValueDescending(entriesAvgSecond);
+		for(int i = 0; i < 20; i++) {
+			if((entriesAvgSecond.get((String)entriesAvgSecond.keySet().toArray()[i])) < 100) {
+				if(((String)entriesDifferences.keySet().toArray()[i]).equals("Canada")) {
+					continue;
+				}
+				else {
+					datasetDoubleBarChartByCountry.addValue(entriesAvg.get((String)entriesDifferences.keySet().toArray()[i]), "1912", (String)entriesDifferences.keySet().toArray()[i]);
+					datasetDoubleBarChartByCountry.addValue(entriesAvgSecond.get((String)entriesDifferences.keySet().toArray()[i]), "2012", (String)entriesDifferences.keySet().toArray()[i]);
+				}
+			}
+		}
+		/*
+		for(int i = 0; i < 50; i++) {
+			if((entriesAvgSecond.get((String)entriesAvgSecond.keySet().toArray()[i])) < 100) {
+				datasetDoubleBarChartByCountry.addValue(entriesAvg.get((String)entriesAvg.keySet().toArray()[i]), "1912", (String)entriesAvg.keySet().toArray()[i]);
+				datasetDoubleBarChartByCountry.addValue(entriesAvgSecond.get((String)entriesAvgSecond.keySet().toArray()[i]), "2012", (String)entriesAvgSecond.keySet().toArray()[i]);
+			}
+		}
+		*/
+		/*
+		for(int i = 0; i < 50; i++) {
+			if((entriesAvgSecond.get((String)entriesAvgSecond.keySet().toArray()[i])) < 100) {
+				datasetDoubleBarChartByCountry.addValue(entriesAvgSecond.get((String)entriesAvgSecond.keySet().toArray()[i]), "2012", (String)entriesAvgSecond.keySet().toArray()[i]);
+			}
+		}
+		*/
+		/*
+		entriesAvg = sortByValue(entriesAvg);
+		for(int i = 0; i < 10; i++) {
+			datasetBasicBarChartByCountry.addValue(entriesAvg.get((String)entriesAvg.keySet().toArray()[i]), (String)entriesAvg.keySet().toArray()[i], (String)entriesAvg.keySet().toArray()[i]);
+		}
+		*/
+		
+		//System.out.println("Reached view visible.");
+	}
 
 	/*
 	static void updateBasicScatterPlotByYear() {

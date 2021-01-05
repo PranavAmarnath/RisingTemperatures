@@ -39,19 +39,22 @@ public class Model {
 						//System.out.println("Create View");
 						Main.verifyStartRead();
 					}
-					int count = 0;
+					//int count = 0;
 					while((line = reader.readNext()) != null) {
 				        //myEntries.add(line);
 						//SwingUtilities.invokeLater(() -> model.addRow(line));
+						/*
 						try {
 							synchronized(model) {
 								model.addRow(line);
-								count++;
+								//count++;
 							}
 						} catch(Exception e) {
 							e.printStackTrace();
 							//System.out.println(count);
 						}
+						*/
+						model.addRow(line);
 						//System.out.println(line.toString());
 				        //model.fireTableDataChanged();
 				    }
@@ -92,6 +95,7 @@ public class Model {
 			*/
 			protected void done() {
 				try {
+					Main.getPB().setValue(Main.getPB().getValue() + 20);
 					reader.close();
 					//System.out.println("Finished model");
 					/*
@@ -104,8 +108,8 @@ public class Model {
 						Main.verifyReadFinished();
 						//Main.getSplash().dispose();
 						//View.getFrame().setVisible(true);
+						//JOptionPane.showMessageDialog(View.getFrame(), "Finished loading data");
 					}
-					//JOptionPane.showMessageDialog(View.getFrame(), "Finished loading data");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

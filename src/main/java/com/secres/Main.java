@@ -13,6 +13,7 @@ public class Main {
 	static Model modelGlobal, modelCountry;
 	private static View view;
 	private static JWindow splash;
+	private static JProgressBar pb;
 	
 	public Main() {
 		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
@@ -57,8 +58,8 @@ public class Main {
 		JLabel img = new JLabel(icon);
 		splashPanel.add(img);
 		
-		JProgressBar pb = new JProgressBar(JProgressBar.HORIZONTAL);
-		pb.setIndeterminate(true);
+		pb = new JProgressBar(JProgressBar.HORIZONTAL);
+		//pb.setIndeterminate(true);
 		splashPanel.add(pb, BorderLayout.SOUTH);
 		
 		splash.setContentPane(splashPanel);
@@ -111,7 +112,13 @@ public class Main {
 		new SwingWorker<Void, Void>() {
 			protected Void doInBackground() throws Exception {
 				GraphCharts.updateBasicBarChartByCountry();
+				GraphCharts.updateDoubleBarChartByCountry();
 				return null;
+			}
+			protected void done() {
+				Main.getPB().setValue(100);
+				splash.dispose();
+				View.getFrame().setVisible(true);
 			}
 		}.execute();
 		
@@ -119,6 +126,10 @@ public class Main {
 	
 	public static JWindow getSplash() {
 		return splash;
+	}
+	
+	public static JProgressBar getPB() {
+		return pb;
 	}
 	
 	public static void main(String[] args) {
@@ -153,7 +164,8 @@ public class Main {
 		UIManager.put("ScrollBar.thumbArc", 999);
 		UIManager.put("ScrollBar.thumbInsets", new Insets(2, 2, 2, 2));
 		UIManager.put("ScrollBar.width", 13);
-		//*/
+		UIManager.put( "SplitPaneDivider.style", "plain" );
+		*/
 		SwingUtilities.invokeLater(() -> {
 			new Main();
 		});
