@@ -45,7 +45,7 @@ public class GraphCharts {
 
 	private static DefaultCategoryDataset datasetBasicLineChart, datasetBasicLineChartByYear;
 	private static XYSeriesCollection datasetBasicScatterPlotByYear, datasetBasicScatterPlotCoolingDec, datasetBasicScatterPlotCoolingJun;
-	private static DefaultCategoryDataset datasetBasicBarChartByCountry, datasetDoubleBarChartByCountry;
+	private static DefaultCategoryDataset datasetBasicBarChartByCountry, datasetDoubleBarChartByCountryGreatest, datasetDoubleBarChartByCountryLeast;
 	
 	static ChartPanel basicLineChart() {
 		datasetBasicLineChart = new DefaultCategoryDataset();
@@ -457,7 +457,7 @@ public class GraphCharts {
 	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValueDescending(Map<K, V> map) {
 		map = map.entrySet().stream()
 			       .sorted(Collections.reverseOrder(Map.Entry.comparingByValue())).collect(Collectors.toMap(
-			    	          Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));;
+			    	          Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
         return map;
     }
@@ -466,21 +466,54 @@ public class GraphCharts {
 	 * @see https://stackoverflow.com/a/2581754/13772184
 	 */
 	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
-        List<Entry<K, V>> list = new ArrayList<>(map.entrySet());
-        list.sort(Entry.comparingByValue());
+		map = map.entrySet().stream()
+			       .sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
+			    	          Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
-        Map<K, V> result = new LinkedHashMap<>();
-        for (Entry<K, V> entry : list) {
-            result.put(entry.getKey(), entry.getValue());
-        }
-
-        return result;
+        return map;
     }
 	
-	static ChartPanel doubleBarChartByCountry() {
-		datasetDoubleBarChartByCountry = new DefaultCategoryDataset();
+	static ChartPanel doubleBarChartByCountryGreatest() {
+		datasetDoubleBarChartByCountryGreatest = new DefaultCategoryDataset();
 
-		JFreeChart barChart = ChartFactory.createBarChart("Countries with Highest Change In Temperature Over a Century (1912-2012)", "Country", "Average Temperature \u00B0C", datasetDoubleBarChartByCountry, PlotOrientation.HORIZONTAL, true, true, false);
+		JFreeChart barChart = ChartFactory.createBarChart("Countries with Greatest Change In Temperature Over a Century (1912-2012)", "Country", "Average Temperature \u00B0C", datasetDoubleBarChartByCountryGreatest, PlotOrientation.HORIZONTAL, true, true, false);
+
+		/*
+		 * @see https://stackoverflow.com/a/61398612/13772184
+		 */
+		CategoryPlot plot = barChart.getCategoryPlot();
+		plot.setRangePannable(true);
+		//Font font = new Font("SansSerif", Font.BOLD, 15);
+		//plot.getDomainAxis().setTickLabelFont(font);
+		/*
+		 * Moves the range axis (temperature) to the bottom
+		 */
+		ValueAxis rangeAxis = plot.getRangeAxis();
+		plot.setRangeAxis(0, rangeAxis);
+		plot.mapDatasetToRangeAxis(0, 0);
+		plot.setRangeAxisLocation(0, AxisLocation.BOTTOM_OR_LEFT);
+		
+		CategoryItemRenderer renderer = plot.getRenderer(); 
+		CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator("{2}", NumberFormat.getInstance()); 
+
+		renderer.setDefaultItemLabelGenerator(generator);
+		renderer.setDefaultItemLabelFont(new Font("SansSerif", Font.PLAIN, 12)); //just font change optional
+		renderer.setDefaultItemLabelsVisible(true);
+		/*
+		 * Default item label is above the bar. Use below method for inside bar.
+		 */
+		//renderer.setDefaultPositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.TOP_CENTER));
+
+		ChartPanel chartPanel = new ChartPanel(barChart);
+		chartPanel.setMouseWheelEnabled(true);
+
+		return chartPanel;
+	}
+	
+	static ChartPanel doubleBarChartByCountryLeast() {
+		datasetDoubleBarChartByCountryLeast = new DefaultCategoryDataset();
+
+		JFreeChart barChart = ChartFactory.createBarChart("Countries with Least Change In Temperature Over a Century (1912-2012)", "Country", "Average Temperature \u00B0C", datasetDoubleBarChartByCountryLeast, PlotOrientation.HORIZONTAL, true, true, false);
 
 		/*
 		 * @see https://stackoverflow.com/a/61398612/13772184
@@ -523,6 +556,9 @@ public class GraphCharts {
 		Map<String, Double> entriesAvg = new LinkedHashMap<>();
 		Map<String, Double> entriesAvgSecond = new LinkedHashMap<>();
 		Map<String, Double> entriesDifferences = new LinkedHashMap<>();
+		Map<String, Double> entriesAvgLeast = new LinkedHashMap<>();
+		Map<String, Double> entriesAvgSecondLeast = new LinkedHashMap<>();
+		Map<String, Double> entriesDifferencesLeast = new LinkedHashMap<>();
 		
 		/*// dummy data
 		datasetDoubleBarChartByCountry.addValue(10, "USA", "2005");
@@ -585,17 +621,38 @@ public class GraphCharts {
 				entriesDifferences.put((String)entriesAvgSecond.keySet().toArray()[i], entriesAvgSecond.get((String)entriesAvgSecond.keySet().toArray()[i]) - entriesAvg.get((String)entriesAvg.keySet().toArray()[i]));
 			}
 		}
+		entriesDifferencesLeast = entriesDifferences;
+		entriesAvgLeast = entriesAvg;
+		entriesAvgSecondLeast = entriesAvgSecond;
+		
 		entriesDifferences = sortByValueDescending(entriesDifferences);
 		entriesAvg = sortByValueDescending(entriesAvg);
 		entriesAvgSecond = sortByValueDescending(entriesAvgSecond);
-		for(int i = 0; i < 20; i++) {
+		
+		entriesDifferencesLeast = sortByValue(entriesDifferencesLeast);
+		entriesAvgLeast = sortByValue(entriesAvgLeast);
+		entriesAvgSecondLeast = sortByValue(entriesAvgSecondLeast);
+		
+		for(int i = 0; i < 19; i++) {
 			if((entriesAvgSecond.get((String)entriesAvgSecond.keySet().toArray()[i])) < 100) {
 				if(((String)entriesDifferences.keySet().toArray()[i]).equals("Canada")) {
 					continue;
 				}
 				else {
-					datasetDoubleBarChartByCountry.addValue(entriesAvg.get((String)entriesDifferences.keySet().toArray()[i]), "1912", (String)entriesDifferences.keySet().toArray()[i]);
-					datasetDoubleBarChartByCountry.addValue(entriesAvgSecond.get((String)entriesDifferences.keySet().toArray()[i]), "2012", (String)entriesDifferences.keySet().toArray()[i]);
+					datasetDoubleBarChartByCountryGreatest.addValue(entriesAvg.get((String)entriesDifferences.keySet().toArray()[i]), "1912", (String)entriesDifferences.keySet().toArray()[i]);
+					datasetDoubleBarChartByCountryGreatest.addValue(entriesAvgSecond.get((String)entriesDifferences.keySet().toArray()[i]), "2012", (String)entriesDifferences.keySet().toArray()[i]);
+				}
+			}
+		}
+		for(int i = 0; i < 15; i++) {
+			if((entriesAvgSecondLeast.get((String)entriesAvgSecondLeast.keySet().toArray()[i])) < 100) {
+				if(((String)entriesDifferencesLeast.keySet().toArray()[i]).equals("Congo (Democratic Republic Of The)")) {
+					datasetDoubleBarChartByCountryLeast.addValue(entriesAvgLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "1912", "D.R. Congo");
+					datasetDoubleBarChartByCountryLeast.addValue(entriesAvgSecondLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "2012", "D.R. Congo");
+				}
+				else {
+					datasetDoubleBarChartByCountryLeast.addValue(entriesAvgLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "1912", (String)entriesDifferencesLeast.keySet().toArray()[i]);
+					datasetDoubleBarChartByCountryLeast.addValue(entriesAvgSecondLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "2012", (String)entriesDifferencesLeast.keySet().toArray()[i]);
 				}
 			}
 		}

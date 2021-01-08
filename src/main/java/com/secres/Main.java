@@ -16,7 +16,7 @@ public class Main {
 	private static View view;
 	private static JWindow splash;
 	private static JProgressBar pb;
-	private int seconds = 32;
+	private int seconds = 22;
 	
 	public Main() {
 		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
@@ -170,10 +170,11 @@ public class Main {
 			            JOptionPane.showMessageDialog(null, "Preferences dialog")
 			        );
 			        desktop.setQuitHandler((e,r) -> {
-			                JOptionPane.showConfirmDialog(View.getFrame(), "Are you sure you want to quit?");
-			                System.exit(0);
+			        	int input = JOptionPane.showConfirmDialog(View.getFrame(), "Are you sure you want to quit?");
+			        	if(input == 0) {
+			        		System.exit(0);
 			            }
-			        );
+			        });
 				});
 			} catch (Exception e) { e.printStackTrace(); }
 		}

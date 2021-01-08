@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.URL;
 
 import javax.swing.*;
@@ -16,7 +18,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
+import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 
 public class View {
@@ -40,7 +44,8 @@ public class View {
 	private final String DECSCATTERPANEL = "Card with Temperatures from December Scatter Plot";
 	private final String JUNSCATTERPANEL = "Card with Temperatures from June Scatter Plot";
 	private final String AVGBARPANEL = "Card with Average Temperature Bar Chart";
-	private final String DOUBLEBARPANEL = "Card with Most Difference in a century Bar Chart";
+	private final String DOUBLEBARGREATESTPANEL = "Card with Most Difference in a century Bar Chart";
+	private final String DOUBLEBARLEASTPANEL = "Card with Least Difference in a century Bar Chart";
 	
 	private JSplitPane splitPane;
 	private JScrollPane treeScroll;
@@ -49,13 +54,15 @@ public class View {
 	private DefaultMutableTreeNode root, dataRootNode, globalTableNode, countryTableNode;
 	private DefaultMutableTreeNode graphRootNode;
 	private DefaultMutableTreeNode globalNode, basicLineNode, basicLineByYearNode, basicScatterByYearNode, basicScatterCoolingDecNode, basicScatterCoolingJunNode;
-	private DefaultMutableTreeNode countryNode, basicBarNode, doubleBarNode;
+	private DefaultMutableTreeNode countryNode, basicBarNode, doubleBarGreatestNode, doubleBarLeastNode;
 	private static JTable tableGlobalData, tableCountryData;
 	private JMenuBar menuBar;
-	private JMenu view;
-	private JMenuItem light, dark, system;
+	private JMenu file, view;
+	private JMenuItem light, dark, system, close;
 	private FlatLightLaf lightLaf = new FlatLightLaf();
+	private FlatIntelliJLaf intellijLaf = new FlatIntelliJLaf();
 	private FlatDarkLaf darkLaf = new FlatDarkLaf();
+	private FlatDarculaLaf darculaLaf = new FlatDarculaLaf();
 	
 	public View() {
 		createAndShowGUI();
@@ -67,7 +74,18 @@ public class View {
 				return new Dimension(800, 600);
 			}
 		};
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				int input = JOptionPane.showConfirmDialog(View.getFrame(), "Are you sure you want to quit?");
+	        	if(input == 0) {
+	        		System.exit(0);
+	            }
+	        	else {
+	        		frame.setVisible(true);
+	        	}
+			}
+		});
 
 		/*
 		 * @see https://stackoverflow.com/a/56924202/13772184
@@ -90,15 +108,27 @@ public class View {
 
 		menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
+		file = new JMenu("File");
 		view = new JMenu("View");
+		menuBar.add(file);
 		menuBar.add(view);
+		
 		light = new JMenuItem("Light");
 		light.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					UIManager.setLookAndFeel(lightLaf);
-				} catch (UnsupportedLookAndFeelException e1) {
-					e1.printStackTrace();
+				if((System.getProperty("os.name").toString()).contains("Mac")) {
+					try {
+						UIManager.setLookAndFeel(intellijLaf);
+					} catch (UnsupportedLookAndFeelException e1) {
+						e1.printStackTrace();
+					}
+				}
+				else {
+					try {
+						UIManager.setLookAndFeel(lightLaf);
+					} catch (UnsupportedLookAndFeelException e1) {
+						e1.printStackTrace();
+					}
 				}
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
@@ -106,10 +136,19 @@ public class View {
 		dark = new JMenuItem("Dark");
 		dark.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					UIManager.setLookAndFeel(darkLaf);
-				} catch (UnsupportedLookAndFeelException e1) {
-					e1.printStackTrace();
+				if((System.getProperty("os.name").toString()).contains("Mac")) {
+					try {
+						UIManager.setLookAndFeel(darculaLaf);
+					} catch (UnsupportedLookAndFeelException e1) {
+						e1.printStackTrace();
+					}
+				}
+				else {
+					try {
+						UIManager.setLookAndFeel(darkLaf);
+					} catch (UnsupportedLookAndFeelException e1) {
+						e1.printStackTrace();
+					}
 				}
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
@@ -133,6 +172,18 @@ public class View {
 		view.add(light);
 		view.add(dark);
 		view.add(system);
+		
+		close = new JMenuItem("Close");
+		file.add(close);
+		close.setAccelerator(KeyStroke.getKeyStroke('W', Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
+		close.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int input = JOptionPane.showConfirmDialog(View.getFrame(), "Are you sure you want to quit?");
+	        	if(input == 0) {
+	        		System.exit(0);
+	            }
+			}
+		});
 		
 		mainPanel = new JPanel(new BorderLayout());
 		frame.add(mainPanel);
@@ -181,9 +232,13 @@ public class View {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, AVGBARPANEL);
 				}
-				else if(node == doubleBarNode) {
+				else if(node == doubleBarGreatestNode) {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
-				    cl.show(cardsPanel, DOUBLEBARPANEL);
+				    cl.show(cardsPanel, DOUBLEBARGREATESTPANEL);
+				}
+				else if(node == doubleBarLeastNode) {
+					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
+					cl.show(cardsPanel, DOUBLEBARLEASTPANEL);
 				}
 				else {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
@@ -314,7 +369,8 @@ public class View {
 			cardsPanel.add(GraphCharts.basicScatterPlotCoolingDec(), DECSCATTERPANEL);
 			cardsPanel.add(GraphCharts.basicScatterPlotCoolingJun(), JUNSCATTERPANEL);
 			cardsPanel.add(GraphCharts.basicBarChartByCountry(), AVGBARPANEL);
-			cardsPanel.add(GraphCharts.doubleBarChartByCountry(), DOUBLEBARPANEL);
+			cardsPanel.add(GraphCharts.doubleBarChartByCountryGreatest(), DOUBLEBARGREATESTPANEL);
+			cardsPanel.add(GraphCharts.doubleBarChartByCountryLeast(), DOUBLEBARLEASTPANEL);
 	    });
 	    /*// Code below incorrectly synchronized
 	    cardsPanel.add(GraphCharts.basicLineChart(), ALLLINEPANEL);
@@ -362,11 +418,13 @@ public class View {
 		countryNode = new DefaultMutableTreeNode("Country Data Graphs");
 		basicBarNode = new DefaultMutableTreeNode("Bar Chart By Country");
 		countryNode.add(basicBarNode);
-		doubleBarNode = new DefaultMutableTreeNode("Double Bar Chart By Country");
-		countryNode.add(doubleBarNode);
+		doubleBarGreatestNode = new DefaultMutableTreeNode("Greatest Increase in Temp.");
+		countryNode.add(doubleBarGreatestNode);
+		doubleBarLeastNode = new DefaultMutableTreeNode("Least Increase in Temp.");
+		countryNode.add(doubleBarLeastNode);
 		
-		graphRootNode.add(countryNode);
 		graphRootNode.add(globalNode);
+		graphRootNode.add(countryNode);
         
         return root;
 	}
