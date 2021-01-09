@@ -46,6 +46,7 @@ public class View {
 	private final String AVGBARPANEL = "Card with Average Temperature Bar Chart";
 	private final String DOUBLEBARGREATESTPANEL = "Card with Most Difference in a century Bar Chart";
 	private final String DOUBLEBARLEASTPANEL = "Card with Least Difference in a century Bar Chart";
+	private final String MULTILINEECONOMYPANEL = "Card with Top 5 Economies Line Chart";
 	
 	private JSplitPane splitPane;
 	private JScrollPane treeScroll;
@@ -54,7 +55,7 @@ public class View {
 	private DefaultMutableTreeNode root, dataRootNode, globalTableNode, countryTableNode;
 	private DefaultMutableTreeNode graphRootNode;
 	private DefaultMutableTreeNode globalNode, basicLineNode, basicLineByYearNode, basicScatterByYearNode, basicScatterCoolingDecNode, basicScatterCoolingJunNode;
-	private DefaultMutableTreeNode countryNode, basicBarNode, doubleBarGreatestNode, doubleBarLeastNode;
+	private DefaultMutableTreeNode countryNode, basicBarNode, doubleBarGreatestNode, doubleBarLeastNode, multiLineEconomyNode;
 	private static JTable tableGlobalData, tableCountryData;
 	private JMenuBar menuBar;
 	private JMenu file, view;
@@ -240,6 +241,10 @@ public class View {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 					cl.show(cardsPanel, DOUBLEBARLEASTPANEL);
 				}
+				else if(node == multiLineEconomyNode) {
+					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
+					cl.show(cardsPanel, MULTILINEECONOMYPANEL);
+				}
 				else {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, EMPTYPANEL);
@@ -371,6 +376,7 @@ public class View {
 			cardsPanel.add(GraphCharts.basicBarChartByCountry(), AVGBARPANEL);
 			cardsPanel.add(GraphCharts.doubleBarChartByCountryGreatest(), DOUBLEBARGREATESTPANEL);
 			cardsPanel.add(GraphCharts.doubleBarChartByCountryLeast(), DOUBLEBARLEASTPANEL);
+			cardsPanel.add(GraphCharts.multiXYLineChartByEconomy(), MULTILINEECONOMYPANEL);
 	    });
 	    /*// Code below incorrectly synchronized
 	    cardsPanel.add(GraphCharts.basicLineChart(), ALLLINEPANEL);
@@ -422,6 +428,8 @@ public class View {
 		countryNode.add(doubleBarGreatestNode);
 		doubleBarLeastNode = new DefaultMutableTreeNode("Least Increase in Temp.");
 		countryNode.add(doubleBarLeastNode);
+		multiLineEconomyNode = new DefaultMutableTreeNode("Top 5 Economies Temp.");
+		countryNode.add(multiLineEconomyNode);
 		
 		graphRootNode.add(globalNode);
 		graphRootNode.add(countryNode);

@@ -95,7 +95,7 @@ public class Model {
 			*/
 			protected void done() {
 				try {
-					Main.getPB().setValue(Main.getPB().getValue() + 20);
+					Main.getPB().setValue(Main.getPB().getValue() + 10);
 					reader.close();
 					//System.out.println("Finished model");
 					/*

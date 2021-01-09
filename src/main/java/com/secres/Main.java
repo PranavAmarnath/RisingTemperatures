@@ -16,7 +16,7 @@ public class Main {
 	private static View view;
 	private static JWindow splash;
 	private static JProgressBar pb;
-	private int seconds = 22;
+	private int seconds = 27;
 	
 	public Main() {
 		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
@@ -133,6 +133,7 @@ public class Main {
 			protected Void doInBackground() throws Exception {
 				GraphCharts.updateBasicBarChartByCountry();
 				GraphCharts.updateDoubleBarChartByCountry();
+				GraphCharts.updateMultiXYLineChartByEconomy();
 				return null;
 			}
 			protected void done() {

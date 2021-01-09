@@ -45,7 +45,9 @@ public class GraphCharts {
 
 	private static DefaultCategoryDataset datasetBasicLineChart, datasetBasicLineChartByYear;
 	private static XYSeriesCollection datasetBasicScatterPlotByYear, datasetBasicScatterPlotCoolingDec, datasetBasicScatterPlotCoolingJun;
+	private static XYSeriesCollection datasetMultiLineChartByEconomy;
 	private static DefaultCategoryDataset datasetBasicBarChartByCountry, datasetDoubleBarChartByCountryGreatest, datasetDoubleBarChartByCountryLeast;
+	private static JFreeChart linePlot; // specific for multi line plot by economy
 	
 	static ChartPanel basicLineChart() {
 		datasetBasicLineChart = new DefaultCategoryDataset();
@@ -679,6 +681,216 @@ public class GraphCharts {
 		*/
 		
 		//System.out.println("Reached view visible.");
+	}
+	
+	static ChartPanel multiXYLineChartByEconomy() {
+		datasetMultiLineChartByEconomy = new XYSeriesCollection();
+
+		linePlot = ChartFactory.createXYLineChart("Average Temperatures of Top 5 World Economies (1900-2013)", "Year", "Average Temperature \u00B0C", datasetMultiLineChartByEconomy, PlotOrientation.VERTICAL, true, true, false);
+
+		/*
+		 * @see https://stackoverflow.com/a/61398612/13772184
+		 */
+		XYPlot plot = linePlot.getXYPlot();
+		XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
+		r.setSeriesLinesVisible(1, Boolean.TRUE);
+		r.setSeriesShapesVisible(1, Boolean.FALSE);
+		r.setDefaultOutlineStroke(new BasicStroke(2.0f));
+		plot.setDomainPannable(true);
+		plot.setRangePannable(true);
+
+		ChartPanel chartPanel = new ChartPanel(linePlot);
+		chartPanel.setMouseWheelEnabled(true);
+
+        CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
+        Crosshair xCrosshair = new Crosshair(Double.NaN, Color.GRAY, new BasicStroke(1f));
+        xCrosshair.setLabelVisible(true);
+        Crosshair yCrosshair0 = new Crosshair(Double.NaN, Color.GRAY, new BasicStroke(1f));
+        yCrosshair0.setLabelVisible(true);
+        Crosshair yCrosshair1 = new Crosshair(Double.NaN, Color.GRAY, new BasicStroke(1f));
+        yCrosshair1.setLabelVisible(true);
+        Crosshair yCrosshair2 = new Crosshair(Double.NaN, Color.GRAY, new BasicStroke(1f));
+        yCrosshair2.setLabelVisible(true);
+        Crosshair yCrosshair3 = new Crosshair(Double.NaN, Color.GRAY, new BasicStroke(1f));
+        yCrosshair3.setLabelVisible(true);
+        Crosshair yCrosshair4 = new Crosshair(Double.NaN, Color.GRAY, new BasicStroke(1f));
+        yCrosshair4.setLabelVisible(true);
+        crosshairOverlay.addDomainCrosshair(xCrosshair);
+        crosshairOverlay.addRangeCrosshair(yCrosshair0);
+        crosshairOverlay.addRangeCrosshair(yCrosshair1);
+        crosshairOverlay.addRangeCrosshair(yCrosshair2);
+        crosshairOverlay.addRangeCrosshair(yCrosshair3);
+        crosshairOverlay.addRangeCrosshair(yCrosshair4);
+
+        chartPanel.addOverlay(crosshairOverlay);
+        
+        chartPanel.addChartMouseListener(new ChartMouseListener() {
+			@Override
+		    public void chartMouseClicked(ChartMouseEvent event) {
+		        // ignore
+		    }
+
+		    @Override
+		    public void chartMouseMoved(ChartMouseEvent event) {
+		        Rectangle2D dataArea = chartPanel.getScreenDataArea();
+		        JFreeChart chart = event.getChart();
+		        XYPlot plot = (XYPlot) chart.getPlot();
+		        ValueAxis xAxis = plot.getDomainAxis();
+		        double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
+		        xCrosshair.setValue(x);
+		        double y0 = DatasetUtils.findYValue(plot.getDataset(), 0, x);
+		        yCrosshair0.setValue(y0);
+		        double y1 = DatasetUtils.findYValue(plot.getDataset(), 1, x);
+		        yCrosshair1.setValue(y1);
+		        double y2 = DatasetUtils.findYValue(plot.getDataset(), 2, x);
+		        yCrosshair2.setValue(y2);
+		        double y3 = DatasetUtils.findYValue(plot.getDataset(), 3, x);
+		        yCrosshair3.setValue(y3);
+		        double y4 = DatasetUtils.findYValue(plot.getDataset(), 4, x);
+		        yCrosshair4.setValue(y4);
+		    }
+		});
+		
+		return chartPanel;
+	}
+	
+	static void updateMultiXYLineChartByEconomy() {
+		XYPlot plot = linePlot.getXYPlot();
+		XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
+		
+		double[] averages = new double[5];
+		//double average = 0;
+		int[] counts = new int[5];
+		int[] iterCounts = new int[5];
+		//int count = 0;
+		
+		String[] countries = new String[5];
+		countries[0] = "China";
+		countries[1] = "Germany";
+		countries[2] = "India";
+		countries[3] = "Japan";
+		countries[4] = "United States";
+		
+		XYSeries[] series = new XYSeries[5];
+		series[0] = new XYSeries(countries[0]);
+		series[1] = new XYSeries(countries[1]);
+		series[2] = new XYSeries(countries[2]);
+		series[3] = new XYSeries(countries[3]);
+		series[4] = new XYSeries(countries[4]);
+
+		for(int i = 0; i < View.getCountryTable().getModel().getRowCount(); i++) {
+			if((Double.parseDouble(((String)View.getCountryTable().getModel().getValueAt(i, 0)).substring(0, 4))) >= 1900) {
+				if(View.getCountryTable().getModel().getValueAt(i, 3).equals(countries[0])) {
+					//System.out.println("United States exists.");
+					//System.out.println("Entered first time");
+					iterCounts[0] = iterCounts[0] + 1;
+					//System.out.println(iterCounts[0]);
+					if((String)View.getCountryTable().getModel().getValueAt(i, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(i, 1)).trim().isEmpty()) {
+						counts[0]++;
+						averages[0] = averages[0] + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1));
+					}
+					if(iterCounts[0] == 12) { // count only becomes 12 after 12 *count increase*, does not mean 12 months... UPDATE: Fixed
+						averages[0] = averages[0]/counts[0];
+						series[0].add(Double.parseDouble(((String)View.getCountryTable().getModel().getValueAt(i, 0)).substring(0, 4)), averages[0]);
+						averages[0] = 0;
+						counts[0] = 0;
+						iterCounts[0] = 0;
+					}
+				}
+				else if(View.getCountryTable().getModel().getValueAt(i, 3).equals(countries[1])) {
+					//System.out.println("United States exists.");
+					//System.out.println("Entered first time");
+					iterCounts[1] = iterCounts[1] + 1;
+					if((String)View.getCountryTable().getModel().getValueAt(i, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(i, 1)).trim().isEmpty()) {
+						counts[1]++;
+						averages[1] = averages[1] + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1));
+					}
+					if(counts[1] == 12) {
+						averages[1] = averages[1]/counts[1];
+						series[1].add(Double.parseDouble(((String)View.getCountryTable().getModel().getValueAt(i, 0)).substring(0, 4)), averages[1]);
+						averages[1] = 0;
+						counts[1] = 0;
+						iterCounts[1] = 0;
+					}
+				}
+				else if(View.getCountryTable().getModel().getValueAt(i, 3).equals(countries[2])) {
+					//System.out.println("India exists.");
+					iterCounts[2] = iterCounts[2] + 1;
+					r.setSeriesPaint(2, new Color(0, 128, 0));
+					if((String)View.getCountryTable().getModel().getValueAt(i, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(i, 1)).trim().isEmpty()) {
+						counts[2]++;
+						averages[2] = averages[2] + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1));
+					}
+					if(iterCounts[2] == 12) {
+						averages[2] = averages[2]/counts[2];
+						series[2].add(Double.parseDouble(((String)View.getCountryTable().getModel().getValueAt(i, 0)).substring(0, 4)), averages[2]);
+						averages[2] = 0;
+						counts[2] = 0;
+						iterCounts[2] = 0;
+					}
+				}
+				else if(View.getCountryTable().getModel().getValueAt(i, 3).equals(countries[3])) {
+					//System.out.println("United States exists.");
+					//System.out.println("Entered first time");
+					iterCounts[3] = iterCounts[3] + 1;
+					r.setSeriesPaint(3, new Color(255, 153, 0));
+					if((String)View.getCountryTable().getModel().getValueAt(i, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(i, 1)).trim().isEmpty()) {
+						counts[3]++;
+						averages[3] = averages[3] + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1));
+					}
+					if(iterCounts[3] == 12) {
+						averages[3] = averages[3]/counts[3];
+						series[3].add(Double.parseDouble(((String)View.getCountryTable().getModel().getValueAt(i, 0)).substring(0, 4)), averages[3]);
+						averages[3] = 0;
+						counts[3] = 0;
+						iterCounts[3] = 0;
+					}
+				}
+				else if(View.getCountryTable().getModel().getValueAt(i, 3).equals(countries[4])) {
+					//System.out.println("United States exists.");
+					//System.out.println("Entered first time");
+					r.setSeriesPaint(4, Color.MAGENTA);
+					iterCounts[4] = iterCounts[4] + 1;
+					if((String)View.getCountryTable().getModel().getValueAt(i, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(i, 1)).trim().isEmpty()) {
+						counts[4]++;
+						averages[4] = averages[4] + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1));
+					}
+					if(iterCounts[4] == 12) {
+						averages[4] =averages[4]/counts[4];
+						series[4].add(Double.parseDouble(((String)View.getCountryTable().getModel().getValueAt(i, 0)).substring(0, 4)), averages[4]);
+						averages[4] = 0;
+						counts[4] = 0;
+						iterCounts[4] = 0;
+					}
+				}
+			}
+		}
+		//System.out.println("Exited loop.");
+
+		for(int i = 0; i < 5; i++) {
+			datasetMultiLineChartByEconomy.addSeries(series[i]);
+		}
+
+		for(int i = 0; i < 5; i++) {
+			double[] coefficients = Regression.getOLSRegression(datasetMultiLineChartByEconomy, i);
+			double b = coefficients[0]; // intercept
+			double m = coefficients[1]; // slope
+			XYSeries trend = new XYSeries(countries[i] + " Trend");
+			double x = series[i].getDataItem(0).getXValue();
+			trend.add(x, m * x + b);
+			x = series[i].getDataItem(series[i].getItemCount() - 1).getXValue();
+			trend.add(x, m * x + b);
+			//System.out.println(SwingUtilities.isEventDispatchThread()); // prints true
+			r.setSeriesOutlineStroke(i+5, new BasicStroke(3.0f));
+			r.setSeriesPaint(i+5, Color.BLACK);
+			plot.getRenderer().setSeriesVisibleInLegend(i+5, Boolean.FALSE, true);
+			datasetMultiLineChartByEconomy.addSeries(trend);
+			System.out.println(countries[i] + ": " + m);
+		}
+
+		SwingUtilities.invokeLater(() -> {
+			Main.getPB().setValue(Main.getPB().getValue() + 20);
+		});
 	}
 
 	/*
