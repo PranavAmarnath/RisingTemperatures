@@ -232,7 +232,12 @@ public class View {
 		view.add(system);
 		viewGroup = new ButtonGroup();
 		viewGroup.add(light);
-		light.setSelected(true);
+		if(System.getProperty("os.name").toString().contains("Mac")) {
+			system.setSelected(true);
+		}
+		else {
+			light.setSelected(true);
+		}
 		viewGroup.add(dark);
 		viewGroup.add(nimbus);
 		viewGroup.add(system);
@@ -248,7 +253,7 @@ public class View {
 		preferences = new JMenuItem("Preferences");
 		file.add(preferences);
 		/** Sets Ctrl + Comma (',') accelerator for 'Preferences' <code>JMenuItem</code> */
-		preferences.setAccelerator(KeyStroke.getKeyStroke(',', Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
+		//preferences.setAccelerator(KeyStroke.getKeyStroke(',', Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 		preferences.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -402,11 +407,11 @@ public class View {
 		//tableGlobalScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 		tableCountryScroll = new JScrollPane(tableCountryData);
 		
-		tableGlobalData.setAutoCreateRowSorter(true);
+		//tableGlobalData.setAutoCreateRowSorter(true);
 		tableGlobalData.setAutoResizeMode(0);
 		tableGlobalData.getTableHeader().setReorderingAllowed(false);
 		
-		tableCountryData.setAutoCreateRowSorter(true);
+		//tableCountryData.setAutoCreateRowSorter(true);
 		tableCountryData.setAutoResizeMode(0);
 		tableCountryData.getTableHeader().setReorderingAllowed(false);
 		
@@ -504,7 +509,7 @@ public class View {
 	}
 	
 	private void handleCopy(JTable table, MouseEvent e) {
-		if (e.getClickCount() == 2) { /** e.getClickCount() == 2 -> double-click */
+		if(e.getClickCount() == 2) { /** e.getClickCount() == 2 -> double-click */
             //System.out.println("right click");
             Point p = e.getPoint();
             int row = table.rowAtPoint(p);
@@ -518,13 +523,7 @@ public class View {
 	}
 	
 	static void createAbout() {
-		JTextArea textArea = new JTextArea();
-		textArea.setEditable(false);
-    	//textArea.setText("\u00a9 2020-2021 Pranav Amarnath");
-		/** Add LICENSE text */
-    	textArea.setText(LICENSE);
-    	JScrollPane scrollPane = new JScrollPane(textArea);
-        JOptionPane.showMessageDialog(null, scrollPane, "About", JOptionPane.INFORMATION_MESSAGE);
+		createAbout(null);
 	}
 	
 	static void createAbout(JFrame frame) {
@@ -538,11 +537,7 @@ public class View {
 	}
 	
 	static void createPreferences() {
-		JTextPane textPane = new JTextPane();
-		textPane.setEditable(false);
-		textPane.setText("Using Graphs:");
-		JScrollPane scrollPane = new JScrollPane(textPane);
-        JOptionPane.showMessageDialog(null, scrollPane, "Preferences", JOptionPane.INFORMATION_MESSAGE);
+		createPreferences(null);
 	}
 	
 	static void createPreferences(JFrame frame) {

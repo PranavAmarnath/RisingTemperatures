@@ -192,7 +192,6 @@ public class Main {
 		 * 
 		 * The default value is false.
 		 */
-		System.setProperty("apple.awt.brushMetalRounded", "true");
 		
 		if(System.getProperty("os.name").toString().contains("Mac")) {
 			try {
@@ -220,7 +219,7 @@ public class Main {
 		UIManager.put("ScrollBar.thumbArc", 999);
 		UIManager.put("ScrollBar.thumbInsets", new Insets(2, 2, 2, 2));
 		UIManager.put("ScrollBar.width", 13);
-		UIManager.put( "SplitPaneDivider.style", "plain" );
+		UIManager.put("SplitPaneDivider.style", "plain");
 		*/
 		SwingUtilities.invokeLater(() -> {
 			new Main();
