@@ -10,13 +10,19 @@ import java.util.Arrays;
 import javax.swing.*;
 import com.formdev.flatlaf.*;
 
+/**
+ * 
+ * @author Pranav Amarnath
+ *
+ */
+
 public class Main {
 
 	static Model modelGlobal, modelCountry;
 	private static View view;
 	private static JWindow splash;
 	private static JProgressBar pb;
-	private int seconds = 27;
+	private int seconds = 30;
 	
 	public Main() {
 		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
@@ -34,7 +40,7 @@ public class Main {
 		
 		modelGlobal = new Model("/GlobalTemperatures.csv");
 		modelCountry = new Model("/GlobalLandTemperaturesByCountry.csv");
-		/*
+		/**
 		// For fixed splash time (5 seconds) irrespective of finished parsing through data -> ..
 		// ..will not work always if model is not done by the time the worker ends, this depends on the data..
 		// ..comment if using dynamic option
@@ -68,6 +74,7 @@ public class Main {
 		timePanel.add(estTime);
 		timePanel.setBackground(new Color(134, 169, 181));
 		Timer estTimer = new Timer(1000, new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				seconds--;
 				estTime.setText("Est. Time Remaining: " + seconds + " seconds...");
@@ -96,12 +103,15 @@ public class Main {
 	
 	private static void createView() {
 		//splash.dispose();
-		view = new View();
+		SwingUtilities.invokeLater(() -> {
+			view = new View();
+		});
 	}
 	
 	static void verifyReadFinished() {
 		/*// Placing Column 23 data into an ArrayList while avoiding empty data
 		Thread thread = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				ArrayList<Object> list = new ArrayList<>();
 				//System.out.println(View.getTable().getModel().getRowCount());
@@ -125,19 +135,28 @@ public class Main {
 		});
 		*/
 		
+		/** Start placing data into graphs; quick reads */
 		GraphCharts.updateDataBasicLineChart();
 		GraphCharts.updateDataBasicChartByYear();
 		GraphCharts.updateScatterPlotCoolingDec();
 		GraphCharts.updateScatterPlotCoolingJun();
+		/** For longer reads, using SwingWorker */
 		new SwingWorker<Void, Void>() {
+			@Override
 			protected Void doInBackground() throws Exception {
 				GraphCharts.updateBasicBarChartByCountry();
 				GraphCharts.updateDoubleBarChartByCountry();
 				GraphCharts.updateMultiXYLineChartByEconomy();
 				return null;
 			}
+			@Override
 			protected void done() {
 				Main.getPB().setValue(100);
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 				splash.dispose();
 				View.getFrame().setVisible(true);
 			}
@@ -145,18 +164,36 @@ public class Main {
 		
  	}
 	
-	public static JWindow getSplash() {
+	static JWindow getSplash() {
 		return splash;
 	}
 	
-	public static JProgressBar getPB() {
+	static JProgressBar getPB() {
 		return pb;
 	}
 	
 	public static void main(String[] args) {
-		///*
-		System.setProperty("apple.laf.useScreenMenuBar", "true"); // for picky mac users
-		System.setProperty("apple.awt.application.name", "Secres"); // mac header on mac menubar
+		/** For picky mac users */
+		System.setProperty("apple.laf.useScreenMenuBar", "true");
+		/** Mac header on mac menubar */
+		System.setProperty("apple.awt.application.name", "Secres");
+		/** Acceleration of graphics, should ONLY be used by developers */
+		//System.setProperty("apple.awt.graphics.EnableQ2DX","true");
+		System.setProperty("apple.awt.antialiasing", "true");
+		System.setProperty("apple.awt.textantialiasing", "true");
+		/**
+		 * @see http://mirror.informatimago.com/next/developer.apple.com/documentation/Java/Conceptual/JavaPropVMInfoRef/JavaPropVMInfoRef.pdf
+		 * 
+		 * Allows you to display your main windows with the “textured” Aqua window appearance,
+		 * including rounded edges. This differs from apple.awt.brushMetalLook in that windows
+		 * with this property set feature rounded corners and thicker edges. This property should be
+		 * applied only to the primary application window, and should not affect supporting windows
+		 * like dialogs or preference windows.
+		 * 
+		 * The default value is false.
+		 */
+		System.setProperty("apple.awt.brushMetalRounded", "true");
+		
 		if(System.getProperty("os.name").toString().contains("Mac")) {
 			try {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -164,17 +201,14 @@ public class Main {
 				SwingUtilities.invokeLater(() -> {
 					Desktop desktop = Desktop.getDesktop();
 					
-			        desktop.setAboutHandler(e ->
-			            JOptionPane.showMessageDialog(null, "About dialog")
-			        );
-			        desktop.setPreferencesHandler(e ->
-			            JOptionPane.showMessageDialog(null, "Preferences dialog")
-			        );
+			        desktop.setAboutHandler(e -> {
+			        	View.createAbout();
+			        });
+			        desktop.setPreferencesHandler(e -> {
+			            View.createPreferences();
+			        });
 			        desktop.setQuitHandler((e,r) -> {
-			        	int input = JOptionPane.showConfirmDialog(View.getFrame(), "Are you sure you want to quit?");
-			        	if(input == 0) {
-			        		System.exit(0);
-			            }
+			        	View.createQuit();
 			        });
 				});
 			} catch (Exception e) { e.printStackTrace(); }

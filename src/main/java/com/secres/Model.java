@@ -11,6 +11,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 
+/**
+ * 
+ * @author Pranav Amarnath
+ *
+ */
+
 public class Model {
 
 	private DefaultTableModel model;

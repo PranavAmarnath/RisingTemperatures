@@ -5,6 +5,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -12,9 +14,16 @@ import java.awt.event.WindowEvent;
 import java.net.URL;
 
 import javax.swing.*;
+import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -22,6 +31,12 @@ import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+
+/**
+ * 
+ * @author Pranav Amarnath
+ *
+ */
 
 public class View {
 
@@ -59,11 +74,40 @@ public class View {
 	private static JTable tableGlobalData, tableCountryData;
 	private JMenuBar menuBar;
 	private JMenu file, view;
-	private JMenuItem light, dark, system, close;
+	private ButtonGroup viewGroup;
+	private JMenuItem about, preferences, close;
+	private JMenuItem light, dark;
+	private static JMenuItem nimbus;
+	static boolean nimbusEnabled = false;
+
+	private JMenuItem system;
 	private FlatLightLaf lightLaf = new FlatLightLaf();
 	private FlatIntelliJLaf intellijLaf = new FlatIntelliJLaf();
 	private FlatDarkLaf darkLaf = new FlatDarkLaf();
 	private FlatDarculaLaf darculaLaf = new FlatDarculaLaf();
+	
+	private final static String LICENSE = "MIT License\n"
+			+ "\n"
+			+ "Copyright \u00a9 2020-2021 Pranav Amarnath\n"
+			+ "\n"
+			+ "Permission is hereby granted, free of charge, to any person obtaining a copy\n"
+			+ "of this software and associated documentation files (the \"Software\"), to deal\n"
+			+ "in the Software without restriction, including without limitation the rights\n"
+			+ "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n"
+			+ "copies of the Software, and to permit persons to whom the Software is\n"
+			+ "furnished to do so, subject to the following conditions:\n"
+			+ "\n"
+			+ "The above copyright notice and this permission notice shall be included in all\n"
+			+ "copies or substantial portions of the Software.\n"
+			+ "\n"
+			+ "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n"
+			+ "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n"
+			+ "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n"
+			+ "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n"
+			+ "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n"
+			+ "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n"
+			+ "SOFTWARE.\n"
+			+ "";
 	
 	public View() {
 		createAndShowGUI();
@@ -78,34 +122,26 @@ public class View {
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				int input = JOptionPane.showConfirmDialog(View.getFrame(), "Are you sure you want to quit?");
-	        	if(input == 0) {
-	        		System.exit(0);
-	            }
-	        	else {
-	        		frame.setVisible(true);
-	        	}
+				createQuit(frame);
 			}
 		});
 
-		/*
-		 * @see https://stackoverflow.com/a/56924202/13772184
-		 */
-		// loading an image from a file
+		/** @see https://stackoverflow.com/a/56924202/13772184 */
+		/** loading an image from a file */
 		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
 		URL imageResource = View.class.getResource("/gear.png"); // URL: https://cdn.pixabay.com/photo/2012/05/04/10/57/gear-47203_1280.png
 		Image image = defaultToolkit.getImage(imageResource);
 
 		try {
-			// this is new since JDK 9
+			/** @since 9 */
 			Taskbar taskbar = Taskbar.getTaskbar();
-			// set icon for mac os (and other systems which do support this method)
+			/** set icon for mac os (and other systems which do support this method) */
 			taskbar.setIconImage(image);
 		} catch (UnsupportedOperationException e) {
-			// set icon for windows (and other systems which do support this method)
+			/** set icon for windows (and other systems which do support this method) */
 			frame.setIconImage(image);
 		}
-		// end citation
+		/** end citation */
 
 		menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
@@ -114,7 +150,7 @@ public class View {
 		menuBar.add(file);
 		menuBar.add(view);
 		
-		light = new JMenuItem("Light");
+		light = new JRadioButtonMenuItem("Light");
 		light.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if((System.getProperty("os.name").toString()).contains("Mac")) {
@@ -134,7 +170,7 @@ public class View {
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
-		dark = new JMenuItem("Dark");
+		dark = new JRadioButtonMenuItem("Dark");
 		dark.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if((System.getProperty("os.name").toString()).contains("Mac")) {
@@ -154,7 +190,26 @@ public class View {
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
-		system = new JMenuItem(System.getProperty("os.name").toString());
+		nimbus = new JRadioButtonMenuItem("Nimbus");
+		nimbus.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+				    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				        if ("Nimbus".equals(info.getName())) {
+				            UIManager.setLookAndFeel(info.getClassName());
+				            break;
+				        }
+				    }
+				} catch (Exception e1) {
+				    // If Nimbus is not available, you can set the GUI to another look and feel.
+					JOptionPane.showMessageDialog(frame, "Nimbus is not available! Requires JRE 6 or later.", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+				SwingUtilities.updateComponentTreeUI(frame);
+			}
+		});
+		nimbus.setEnabled(false);
+		system = new JRadioButtonMenuItem(System.getProperty("os.name").toString());
 		system.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -172,17 +227,41 @@ public class View {
 		});
 		view.add(light);
 		view.add(dark);
+		view.addSeparator();
+		view.add(nimbus);
 		view.add(system);
+		viewGroup = new ButtonGroup();
+		viewGroup.add(light);
+		light.setSelected(true);
+		viewGroup.add(dark);
+		viewGroup.add(nimbus);
+		viewGroup.add(system);
 		
+		about = new JMenuItem("About");
+		file.add(about);
+		about.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				createAbout(frame);
+			}
+		});
+		preferences = new JMenuItem("Preferences");
+		file.add(preferences);
+		/** Sets Ctrl + Comma (',') accelerator for 'Preferences' <code>JMenuItem</code> */
+		preferences.setAccelerator(KeyStroke.getKeyStroke(',', Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
+		preferences.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				createPreferences(frame);
+			}
+		});
 		close = new JMenuItem("Close");
 		file.add(close);
 		close.setAccelerator(KeyStroke.getKeyStroke('W', Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 		close.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
-				int input = JOptionPane.showConfirmDialog(View.getFrame(), "Are you sure you want to quit?");
-	        	if(input == 0) {
-	        		System.exit(0);
-	            }
+				createQuit(frame);
 			}
 		});
 		
@@ -196,6 +275,7 @@ public class View {
 		componentTree.setShowsRootHandles(true);
 		componentTree.collapseRow(0);
 		componentTree.addTreeSelectionListener(new TreeSelectionListener() {
+			@Override
 			public void valueChanged(TreeSelectionEvent e) {
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) componentTree.getLastSelectedPathComponent();
 				componentTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -262,9 +342,7 @@ public class View {
 		tableGlobalPanel = new JPanel(new BorderLayout());
 		tableCountryPanel = new JPanel(new BorderLayout());
 		
-		/*
-		 * @see https://stackoverflow.com/a/5630271/13772184
-		 */
+		/** @see https://stackoverflow.com/a/5630271/13772184 */
 		/*// Start citation
 		String[] header = {"Name", "Value"};
         String[] a = new String[0];
@@ -278,12 +356,14 @@ public class View {
         // end citation */
 		
 		tableGlobalData = new JTable(Main.modelGlobal.getModel()) {
+			@Override
 			public boolean isCellEditable(int row, int column) {  
 				return false;
 			}
 		};
 		
 		tableCountryData = new JTable(Main.modelCountry.getModel()) {
+			@Override
 			public boolean isCellEditable(int row, int column) {  
 				return false;
 			}
@@ -306,34 +386,14 @@ public class View {
         tableGlobalData.addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {
-		        if (e.getClickCount() == 2) { //e.getClickCount() == 2 -> double-click
-		            //System.out.println("right click");
-		            Point p = e.getPoint();
-		            int row = tableGlobalData.rowAtPoint(p);
-		            int col = tableGlobalData.columnAtPoint(p);
-		            Object value = tableGlobalData.getValueAt(row, col);
-		            StringSelection stringSelection = new StringSelection(value.toString());
-		            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-		            clipboard.setContents(stringSelection, stringSelection);
-		            JOptionPane.showMessageDialog(frame, "Copied text!\nHover the mouse over the table for more info.");
-		        }
+		        handleCopy(tableGlobalData, e);
 		    }
 		});
 		tableCountryData.setToolTipText("<html>Display of CSV Data in Table format.<br>Double-click on a cell to copy text.<br>Press CTRL+C to copy row(s).</html>");
         tableCountryData.addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {
-		        if (e.getClickCount() == 2) { //e.getClickCount() == 2 -> double-click
-		            //System.out.println("right click");
-		            Point p = e.getPoint();
-		            int row = tableCountryData.rowAtPoint(p);
-		            int col = tableCountryData.columnAtPoint(p);
-		            Object value = tableCountryData.getValueAt(row, col);
-		            StringSelection stringSelection = new StringSelection(value.toString());
-		            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-		            clipboard.setContents(stringSelection, stringSelection);
-		            JOptionPane.showMessageDialog(frame, "Copied text!\nHover the mouse over the table for more info.");
-		        }
+		        handleCopy(tableCountryData, e);
 		    }
 		});
 		//*/
@@ -365,24 +425,18 @@ public class View {
 		cardsPanel.add(tableGlobalPanel, TABLEGLOBALPANEL);
 		cardsPanel.add(tableCountryPanel, TABLECOUNTRYPANEL);
 		CardLayout cl = (CardLayout)(cardsPanel.getLayout());
+		//System.out.println(SwingUtilities.isEventDispatchThread());
 	    cl.show(cardsPanel, EMPTYPANEL);
 		
-	    SwingUtilities.invokeLater(() -> {
-	    	cardsPanel.add(GraphCharts.basicLineChart(), ALLLINEPANEL);
-			cardsPanel.add(GraphCharts.basicLineChartByYear(), AVGLINEPANEL);
-			cardsPanel.add(GraphCharts.basicScatterPlotByYear(), AVGSCATTERPANEL);
-			cardsPanel.add(GraphCharts.basicScatterPlotCoolingDec(), DECSCATTERPANEL);
-			cardsPanel.add(GraphCharts.basicScatterPlotCoolingJun(), JUNSCATTERPANEL);
-			cardsPanel.add(GraphCharts.basicBarChartByCountry(), AVGBARPANEL);
-			cardsPanel.add(GraphCharts.doubleBarChartByCountryGreatest(), DOUBLEBARGREATESTPANEL);
-			cardsPanel.add(GraphCharts.doubleBarChartByCountryLeast(), DOUBLEBARLEASTPANEL);
-			cardsPanel.add(GraphCharts.multiXYLineChartByEconomy(), MULTILINEECONOMYPANEL);
-	    });
-	    /*// Code below incorrectly synchronized
 	    cardsPanel.add(GraphCharts.basicLineChart(), ALLLINEPANEL);
-		cardsPanel.add(GraphCharts.basicLineChartByYear(), AVGLINEPANEL);
-		cardsPanel.add(GraphCharts.basicScatterPlotByYear(), AVGSCATTERPANEL);
-		*/
+	    cardsPanel.add(GraphCharts.basicLineChartByYear(), AVGLINEPANEL);
+	    cardsPanel.add(GraphCharts.basicScatterPlotByYear(), AVGSCATTERPANEL);
+	    cardsPanel.add(GraphCharts.basicScatterPlotCoolingDec(), DECSCATTERPANEL);
+	    cardsPanel.add(GraphCharts.basicScatterPlotCoolingJun(), JUNSCATTERPANEL);
+	    cardsPanel.add(GraphCharts.basicBarChartByCountry(), AVGBARPANEL);
+	    cardsPanel.add(GraphCharts.doubleBarChartByCountryGreatest(), DOUBLEBARGREATESTPANEL);
+	    cardsPanel.add(GraphCharts.doubleBarChartByCountryLeast(), DOUBLEBARLEASTPANEL);
+	    cardsPanel.add(GraphCharts.multiXYLineChartByEconomy(), MULTILINEECONOMYPANEL);
 		
 		graphPanel.add(cardsPanel);
 		
@@ -393,7 +447,7 @@ public class View {
 		frame.pack();
 		splitPane.setResizeWeight(0.25);
 		splitPane.setDividerLocation(0.25);
-		frame.setLocationByPlatform(true);
+		//frame.setLocationByPlatform(true);
 	}
 	
 	private DefaultMutableTreeNode setTreeModel() {
@@ -447,6 +501,125 @@ public class View {
 	
 	public static JTable getCountryTable() {
 		return tableCountryData;
+	}
+	
+	private void handleCopy(JTable table, MouseEvent e) {
+		if (e.getClickCount() == 2) { /** e.getClickCount() == 2 -> double-click */
+            //System.out.println("right click");
+            Point p = e.getPoint();
+            int row = table.rowAtPoint(p);
+            int col = table.columnAtPoint(p);
+            Object value = table.getValueAt(row, col);
+            StringSelection stringSelection = new StringSelection(value.toString());
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(stringSelection, stringSelection);
+            JOptionPane.showMessageDialog(frame, "Copied text!\nHover the mouse over the table for more info.");
+        }
+	}
+	
+	static void createAbout() {
+		JTextArea textArea = new JTextArea();
+		textArea.setEditable(false);
+    	//textArea.setText("\u00a9 2020-2021 Pranav Amarnath");
+		/** Add LICENSE text */
+    	textArea.setText(LICENSE);
+    	JScrollPane scrollPane = new JScrollPane(textArea);
+        JOptionPane.showMessageDialog(null, scrollPane, "About", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	static void createAbout(JFrame frame) {
+		JTextArea textArea = new JTextArea();
+		textArea.setEditable(false);
+    	//textArea.setText("\u00a9 2020-2021 Pranav Amarnath");
+		/** Add LICENSE text */
+    	textArea.setText(LICENSE);
+    	JScrollPane scrollPane = new JScrollPane(textArea);
+        JOptionPane.showMessageDialog(frame, scrollPane, "About", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	static void createPreferences() {
+		JTextPane textPane = new JTextPane();
+		textPane.setEditable(false);
+		textPane.setText("Using Graphs:");
+		JScrollPane scrollPane = new JScrollPane(textPane);
+        JOptionPane.showMessageDialog(null, scrollPane, "Preferences", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	static void createPreferences(JFrame frame) {
+		JPanel mainPanel = new JPanel(new BorderLayout());
+		JPanel prefPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JCheckBox enableNimbus = new JCheckBox("Nimbus Theme (WARNING)");
+		enableNimbus.setSelected(nimbusEnabled);
+		enableNimbus.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if(nimbusEnabled) {
+					nimbus.setEnabled(false);
+					nimbusEnabled = false;
+				}
+				else {
+					nimbus.setEnabled(true);
+					nimbusEnabled = true;
+				}
+			}
+		});
+		prefPanel.add(enableNimbus);
+		mainPanel.add(prefPanel, BorderLayout.NORTH);
+		
+		JTextPane textPane = new JTextPane();
+		textPane.setEditable(false);
+		
+		/** @see https://stackoverflow.com/a/4059365 */
+		StyledDocument doc = textPane.getStyledDocument();
+		
+		SimpleAttributeSet headers = new SimpleAttributeSet();
+		StyleConstants.setBold(headers, true);
+		StyleConstants.setFontSize(headers, 17);
+		
+		SimpleAttributeSet text = new SimpleAttributeSet();
+		StyleConstants.setFontSize(text, 14);
+		
+		try {
+			doc.insertString(doc.getLength(), "Table Info:\n", headers);
+			doc.insertString(doc.getLength(), "Double click over a cell to copy text.\n", text);
+			doc.insertString(doc.getLength(), "Press Ctrl-C to copy a row or multiple rows.\n", text);
+			doc.insertString(doc.getLength(), "Hover over the table for similar info.\n", text);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			doc.insertString(doc.getLength(), "Graph Info:\n", headers);
+			doc.insertString(doc.getLength(), "Right-click on any graph for more preferences.\n", text);
+			doc.insertString(doc.getLength(), "Ctrl-press on any graph to pan.\n", text);
+			doc.insertString(doc.getLength(), "Scroll the mouse on any graph to zoom.\n", text);
+			doc.insertString(doc.getLength(), "Drag on any graph from top left to bottom right to select a zoomed-in portion.\n", text);
+			doc.insertString(doc.getLength(), "Drag the mouse up and release (~1 sec.) to exit zoomed state.\n", text);
+		} catch (BadLocationException e1) {
+			e1.printStackTrace();
+		}
+
+		JScrollPane scrollPane = new JScrollPane(textPane);
+		mainPanel.add(scrollPane);
+		
+        JOptionPane.showMessageDialog(frame, mainPanel, "Preferences", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	static void createQuit() {
+		int input = JOptionPane.showConfirmDialog(null, "Do you want to quit?", "Quit", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+    	if(input == 0) {
+    		System.exit(0);
+        }
+	}
+	
+	static void createQuit(JFrame frame) {
+		int input = JOptionPane.showConfirmDialog(frame, "Do you want to quit?", "Quit", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+    	if(input == 0) {
+    		frame.dispose();
+        }
+    	else {
+    		frame.setVisible(true);
+    	}
 	}
 	
 }
