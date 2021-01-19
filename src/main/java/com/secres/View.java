@@ -11,6 +11,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.net.URL;
 
 import javax.swing.*;
@@ -387,14 +388,16 @@ public class View {
 		}
 		
 		///*
-		tableGlobalData.setToolTipText("<html>Display of CSV Data in Table format.<br>Double-click on a cell to copy text.<br>Press CTRL+C to copy row(s).</html>");
+		tableGlobalData.setCellSelectionEnabled(true);
+		tableGlobalData.setToolTipText("<html>Display of CSV Data in Table format.<br>Double-click/CTRL+C on a cell to copy text.</html>");
         tableGlobalData.addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {
 		        handleCopy(tableGlobalData, e);
 		    }
 		});
-		tableCountryData.setToolTipText("<html>Display of CSV Data in Table format.<br>Double-click on a cell to copy text.<br>Press CTRL+C to copy row(s).</html>");
+        tableCountryData.setCellSelectionEnabled(true);
+		tableCountryData.setToolTipText("<html>Display of CSV Data in Table format.<br>Double-click/CTRL+C on a cell to copy text.</html>");
         tableCountryData.addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {
@@ -522,18 +525,74 @@ public class View {
         }
 	}
 	
+	/**
+	 * @see https://stackoverflow.com/a/13605411
+	 * 
+	 * Converts a given Image into a BufferedImage
+	 *
+	 * @param img The Image to be converted
+	 * @return The converted BufferedImage
+	 */
+	public static BufferedImage toBufferedImage(Image img)
+	{
+	    if (img instanceof BufferedImage)
+	    {
+	        return (BufferedImage) img;
+	    }
+
+	    // Create a buffered image with transparency
+	    BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+	    // Draw the image on to the buffered image
+	    Graphics2D bGr = bimage.createGraphics();
+	    bGr.drawImage(img, 0, 0, null);
+	    bGr.dispose();
+
+	    // Return the buffered image
+	    return bimage;
+	}
+	
 	static void createAbout() {
 		createAbout(null);
 	}
 	
 	static void createAbout(JFrame frame) {
+		/*
 		JTextArea textArea = new JTextArea();
 		textArea.setEditable(false);
     	//textArea.setText("\u00a9 2020-2021 Pranav Amarnath");
-		/** Add LICENSE text */
+		// Add LICENSE text
     	textArea.setText(LICENSE);
     	JScrollPane scrollPane = new JScrollPane(textArea);
-        JOptionPane.showMessageDialog(frame, scrollPane, "About", JOptionPane.INFORMATION_MESSAGE);
+    	*/
+		JPanel mainPanel = new JPanel(new BorderLayout());
+		URL imageResource = Main.class.getResource("/gear.png"); // URL: https://cdn.pixabay.com/photo/2012/05/04/10/57/gear-47203_1280.png
+		BufferedImage img = toBufferedImage(new ImageIcon(imageResource).getImage());
+		JLabel icon = new JLabel();
+		icon.setIcon(new ImageIcon(img));
+		Image dimg = img.getScaledInstance(49, 51, Image.SCALE_SMOOTH);
+		icon.setIcon(new ImageIcon(dimg));
+		JPanel imgPanel = new JPanel();
+		imgPanel.add(icon);
+		mainPanel.add(imgPanel);
+		
+		JPanel text1Panel = new JPanel();
+		JPanel text2Panel = new JPanel();
+		JPanel text3Panel = new JPanel();
+		JLabel text1 = new JLabel("Version 1.0", SwingConstants.CENTER);
+		text1Panel.add(text1);
+		JLabel text2 = new JLabel("<html>Copyright \u00a9 2020-2021 Pranav Amarnath<br><div style='text-align: center;'>All Rights Reserved.</div></html>", SwingConstants.CENTER);
+		text2Panel.add(text2);
+		//JLabel text3 = new JLabel("All Rights Reserved.", SwingConstants.CENTER);
+		//text3Panel.add(text3);
+		JPanel textPanel = new JPanel();
+		textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.PAGE_AXIS));
+		textPanel.add(text1Panel);
+		textPanel.add(text2Panel);
+		//textPanel.add(text3Panel);
+		mainPanel.add(textPanel, BorderLayout.SOUTH);
+		
+		JOptionPane.showMessageDialog(frame, mainPanel, "About", JOptionPane.PLAIN_MESSAGE);
 	}
 	
 	static void createPreferences() {
@@ -577,7 +636,7 @@ public class View {
 		try {
 			doc.insertString(doc.getLength(), "Table Info:\n", headers);
 			doc.insertString(doc.getLength(), "Double click over a cell to copy text.\n", text);
-			doc.insertString(doc.getLength(), "Press Ctrl-C to copy a row or multiple rows.\n", text);
+			doc.insertString(doc.getLength(), "Press Ctrl-C to copy multiple cells or row(s).\n", text);
 			doc.insertString(doc.getLength(), "Hover over the table for similar info.\n", text);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -589,7 +648,9 @@ public class View {
 			doc.insertString(doc.getLength(), "Ctrl-press on any graph to pan.\n", text);
 			doc.insertString(doc.getLength(), "Scroll the mouse on any graph to zoom.\n", text);
 			doc.insertString(doc.getLength(), "Drag on any graph from top left to bottom right to select a zoomed-in portion.\n", text);
+			//System.out.println(SwingUtilities.isEventDispatchThread());
 			doc.insertString(doc.getLength(), "Drag the mouse up and release (~1 sec.) to exit zoomed state.\n", text);
+			doc.insertString(doc.getLength(), "Hover the mouse over any point/bar etc. to view the value.\n", headers);
 		} catch (BadLocationException e1) {
 			e1.printStackTrace();
 		}

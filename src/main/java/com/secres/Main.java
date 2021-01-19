@@ -26,7 +26,7 @@ public class Main {
 	
 	public Main() {
 		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
-		URL imageResource = View.class.getResource("/gear.png"); // URL: https://cdn.pixabay.com/photo/2012/05/04/10/57/gear-47203_1280.png
+		URL imageResource = Main.class.getResource("/gear.png"); // URL: https://cdn.pixabay.com/photo/2012/05/04/10/57/gear-47203_1280.png
 		Image image = defaultToolkit.getImage(imageResource);
 
 		initSplash();
@@ -181,17 +181,6 @@ public class Main {
 		//System.setProperty("apple.awt.graphics.EnableQ2DX","true");
 		System.setProperty("apple.awt.antialiasing", "true");
 		System.setProperty("apple.awt.textantialiasing", "true");
-		/**
-		 * @see http://mirror.informatimago.com/next/developer.apple.com/documentation/Java/Conceptual/JavaPropVMInfoRef/JavaPropVMInfoRef.pdf
-		 * 
-		 * Allows you to display your main windows with the “textured” Aqua window appearance,
-		 * including rounded edges. This differs from apple.awt.brushMetalLook in that windows
-		 * with this property set feature rounded corners and thicker edges. This property should be
-		 * applied only to the primary application window, and should not affect supporting windows
-		 * like dialogs or preference windows.
-		 * 
-		 * The default value is false.
-		 */
 		
 		if(System.getProperty("os.name").toString().contains("Mac")) {
 			try {
@@ -215,12 +204,10 @@ public class Main {
 		else {
 			FlatLightLaf.install();
 		}
-		/*
-		UIManager.put("ScrollBar.thumbArc", 999);
-		UIManager.put("ScrollBar.thumbInsets", new Insets(2, 2, 2, 2));
-		UIManager.put("ScrollBar.width", 13);
-		UIManager.put("SplitPaneDivider.style", "plain");
-		*/
+		//UIManager.put("ScrollBar.thumbArc", 999);
+		//UIManager.put("ScrollBar.thumbInsets", new Insets(2, 2, 2, 2));
+		//UIManager.put("ScrollBar.width", 13);
+		//UIManager.put("SplitPaneDivider.style", "plain");
 		SwingUtilities.invokeLater(() -> {
 			new Main();
 		});

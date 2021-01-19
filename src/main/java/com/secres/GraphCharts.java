@@ -135,10 +135,13 @@ public class GraphCharts {
 				if((String)View.getGlobalTable().getModel().getValueAt(i+j, 1) != null && !((String)View.getGlobalTable().getModel().getValueAt(i+j, 1)).trim().isEmpty()) {
 					entries.put((String)View.getGlobalTable().getModel().getValueAt(i+j, 0), Double.parseDouble((String)View.getGlobalTable().getModel().getValueAt(i+j, 1)));
 					//System.out.println("i: " + i + ", j: " + j);
+					count++;
+					average = average + entries.get((String)View.getGlobalTable().getModel().getValueAt(i+j, 0));
 				}
 			}
 			//System.out.println(entries.size());
-			count = 0;
+			//count = 0;
+			/*
 			for(int k = 0; k < entries.size(); k++) {
 				if((String)View.getGlobalTable().getModel().getValueAt(i+k, 1) != null && !((String)View.getGlobalTable().getModel().getValueAt(i+k, 1)).trim().isEmpty()) {
 					//entriesList.add(entries.get((String)View.getGlobalTable().getModel().getValueAt(i+k, 0)));
@@ -147,6 +150,9 @@ public class GraphCharts {
 					//System.out.println("Year: " + (String)View.getGlobalTable().getModel().getValueAt(i+k, 0) + "Average: " + average);
 				}
 			}
+			*/
+			//System.out.println(count);
+			//System.out.println(average);
 			//System.out.println(Arrays.toString(entriesList.toArray()));
 			/*
 			for(int l = 0; l < entriesList.size(); l++) {
@@ -155,11 +161,13 @@ public class GraphCharts {
 			*/
 			average = average/count;
 			//entriesAvg.add(average);
+			/** I do the substring(0, 4) because each year will be 1750-01-01, 1751-01-01 etc. -> to shorten to 1750, 1751 etc. */
 			datasetBasicLineChartByYear.addValue(average, "Average temperature per year", ((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4));
 			/** Start Scatter Plot */
 			series.add(Integer.parseInt(((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4)), average); // add elements
 			/** End Scatter Plot */
 			average = 0;
+			count = 0;
 			entries.clear();
 			entriesList.clear();
 		}
@@ -433,7 +441,7 @@ public class GraphCharts {
 		}
 		*/
 		SwingUtilities.invokeLater(() -> {
-			Main.getPB().setValue(Main.getPB().getValue() + 20);
+			Main.getPB().setValue(Main.getPB().getValue() + 30);
 		});
 	}
 	
@@ -649,14 +657,16 @@ public class GraphCharts {
 			datasetBasicBarChartByCountry.addValue(entriesAvg.get((String)entriesAvg.keySet().toArray()[i]), (String)entriesAvg.keySet().toArray()[i], (String)entriesAvg.keySet().toArray()[i]);
 		}
 		*/
-		
+		SwingUtilities.invokeLater(() -> {
+			Main.getPB().setValue(Main.getPB().getValue() + 30);
+		});
 		//System.out.println("Reached view visible.");
 	}
 	
 	static ChartPanel multiXYLineChartByEconomy() {
 		datasetMultiLineChartByEconomy = new XYSeriesCollection();
 
-		linePlot = ChartFactory.createXYLineChart("Average Temperatures of Top 5 World Economies (1900-2013)", "Year", "Average Temperature \u00B0C", datasetMultiLineChartByEconomy, PlotOrientation.VERTICAL, true, true, false);
+		linePlot = ChartFactory.createXYLineChart("Average Temperatures of Top 5 World Economies (1900-2012)", "Year", "Average Temperature \u00B0C", datasetMultiLineChartByEconomy, PlotOrientation.VERTICAL, true, true, false);
 
 		/** @see https://stackoverflow.com/a/61398612/13772184 */
 		XYPlot plot = linePlot.getXYPlot();
@@ -856,10 +866,12 @@ public class GraphCharts {
 			/** Prints out slope of trend line for each country. */
 			//System.out.println(countries[i] + ": " + m);
 		}
-
+		
+		/*
 		SwingUtilities.invokeLater(() -> {
 			Main.getPB().setValue(Main.getPB().getValue() + 20);
 		});
+		*/
 	}
 
 	/*
