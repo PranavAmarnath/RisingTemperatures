@@ -213,24 +213,15 @@ public class View {
 		system = new JRadioButtonMenuItem(System.getProperty("os.name").toString());
 		system.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if((System.getProperty("os.name").toString()).contains("Mac")) {
-					try {
-						UIManager.setLookAndFeel("org.violetlib.aqua.AquaLookAndFeel");
-					} catch (Exception e1) {
-						e1.printStackTrace();
-						try {
-							UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-						} catch (Exception e2) {
-							e2.printStackTrace();
-						}
-					}
+				try {
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				} catch (Exception e2) {
+					e2.printStackTrace();
 				}
-				else {
-					try {
-						UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-					} catch (Exception e2) {
-						e2.printStackTrace();
-					}
+				try {
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				} catch (Exception e3) {
+					e3.printStackTrace();
 				}
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
@@ -601,7 +592,7 @@ public class View {
 		//textPanel.add(text3Panel);
 		mainPanel.add(textPanel, BorderLayout.SOUTH);
 		
-		JOptionPane.showOptionDialog(frame, mainPanel, "About", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{}, null);
+		JOptionPane.showMessageDialog(frame, mainPanel, "About", JOptionPane.PLAIN_MESSAGE);
 	}
 	
 	static void createPreferences() {

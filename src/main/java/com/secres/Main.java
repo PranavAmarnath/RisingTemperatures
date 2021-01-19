@@ -9,7 +9,6 @@ import java.util.Arrays;
 
 import javax.swing.*;
 import com.formdev.flatlaf.*;
-import org.violetlib.aqua.*;
 
 /**
  * 
@@ -182,11 +181,10 @@ public class Main {
 		//System.setProperty("apple.awt.graphics.EnableQ2DX","true");
 		System.setProperty("apple.awt.antialiasing", "true");
 		System.setProperty("apple.awt.textantialiasing", "true");
-		System.setProperty("apple.awt.application.appearance", "system");
 		
 		if(System.getProperty("os.name").toString().contains("Mac")) {
 			try {
-				UIManager.setLookAndFeel("org.violetlib.aqua.AquaLookAndFeel");
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				
 				SwingUtilities.invokeLater(() -> {
 					Desktop desktop = Desktop.getDesktop();
