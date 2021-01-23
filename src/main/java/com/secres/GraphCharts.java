@@ -49,14 +49,16 @@ import javax.swing.SwingWorker;
 
 public class GraphCharts {
 
-	private static DefaultCategoryDataset datasetBasicLineChart, datasetBasicLineChartByYear;
+	//private static DefaultCategoryDataset datasetBasicLineChart, datasetBasicLineChartByYear;
+	private static XYSeriesCollection datasetBasicLineChart, datasetBasicLineChartByYear;
 	private static XYSeriesCollection datasetBasicScatterPlotByYear, datasetBasicScatterPlotCoolingDec, datasetBasicScatterPlotCoolingJun;
 	private static XYSeriesCollection datasetMultiLineChartByEconomy;
 	private static DefaultCategoryDataset datasetBasicBarChartByCountry, datasetDoubleBarChartByCountryGreatest, datasetDoubleBarChartByCountryLeast;
-	private static JFreeChart linePlot; // specific for multi line plot by economy
+	//private static JFreeChart linePlot; // specific for multi line plot by economy
+	static JFreeChart[] charts = new JFreeChart[10];
 	
 	static ChartPanel basicLineChart() {
-		datasetBasicLineChart = new DefaultCategoryDataset();
+		datasetBasicLineChart = new XYSeriesCollection();
 		/*// dummy data
 		dataset.addValue( 15 , "schools" , "1970" );
 		dataset.addValue( 30 , "schools" , "1980" );
@@ -66,11 +68,12 @@ public class GraphCharts {
 		dataset.addValue( 300 , "schools" , "2014" );
 		*/
 
-		JFreeChart allLineChart = ChartFactory.createLineChart("All Temperatures 1750-2015", "Date", "Temperature", datasetBasicLineChart, PlotOrientation.VERTICAL, true, true, false);
-		CategoryPlot allLinePlot = (CategoryPlot) allLineChart.getCategoryPlot();
+		charts[0] = ChartFactory.createXYLineChart("All Temperatures 1750-2015", "Date", "Temperature", datasetBasicLineChart, PlotOrientation.VERTICAL, true, true, false);
+		XYPlot allLinePlot = (XYPlot) charts[0].getXYPlot();
+		allLinePlot.setDomainPannable(true);
 		allLinePlot.setRangePannable(true);		
 
-		ChartPanel chartPanel = new ChartPanel(allLineChart);
+		ChartPanel chartPanel = new ChartPanel(charts[0]);
 		chartPanel.setMouseWheelEnabled(true);
 		//chartPanel.setDomainZoomable(true);
 
@@ -78,16 +81,18 @@ public class GraphCharts {
 	}
 
 	static void updateDataBasicLineChart() {
+		XYSeries basicLine = new XYSeries("Temperature over time");
 		//System.out.println("Entered updateDataBasicLineChart()");
 		for(int i = 0; i < View.getGlobalTable().getModel().getRowCount(); i++) {
 			if(!(((String)View.getGlobalTable().getModel().getValueAt(i, 1)).equals(""))) {
-				datasetBasicLineChart.addValue(Double.parseDouble((String)View.getGlobalTable().getModel().getValueAt(i, 1)), "Temperature over time", (String)View.getGlobalTable().getModel().getValueAt(i, 0));
+				basicLine.add(Double.parseDouble(((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4)), Double.parseDouble((String)View.getGlobalTable().getModel().getValueAt(i, 1)));
 			}
 		}
+		datasetBasicLineChart.addSeries(basicLine);
 	}
 
 	static ChartPanel basicLineChartByYear() {
-		datasetBasicLineChartByYear = new DefaultCategoryDataset();
+		datasetBasicLineChartByYear = new XYSeriesCollection();
 		/*// dummy data
 		dataset.addValue( 15 , "schools" , "1970" );
 		dataset.addValue( 30 , "schools" , "1980" );
@@ -97,10 +102,11 @@ public class GraphCharts {
 		dataset.addValue( 300 , "schools" , "2014" );
 		*/
 
-		JFreeChart allLineChart = ChartFactory.createLineChart("Average Temperatures 1750-2015", "Year", "Average Temperature \u00B0C", datasetBasicLineChartByYear, PlotOrientation.VERTICAL, true, true, false);
+		charts[1] = ChartFactory.createXYLineChart("Average Temperatures 1750-2015", "Year", "Average Temperature \u00B0C", datasetBasicLineChartByYear, PlotOrientation.VERTICAL, true, true, false);
 		//allLineChart.getCategoryPlot().getRangeAxis().setLowerBound(6.0);
 		//allLineChart.getCategoryPlot().getRangeAxis().setUpperBound(12.0);
-		CategoryPlot allLinePlot = (CategoryPlot) allLineChart.getCategoryPlot();
+		XYPlot allLinePlot = (XYPlot) charts[1].getXYPlot();
+		allLinePlot.setDomainPannable(true);
 		allLinePlot.setRangePannable(true);
 
 		/*
@@ -112,7 +118,7 @@ public class GraphCharts {
 		*/
 		//System.out.println(SwingUtilities.isEventDispatchThread()); // prints true
 
-		ChartPanel chartPanel = new ChartPanel(allLineChart);
+		ChartPanel chartPanel = new ChartPanel(charts[1]);
 		chartPanel.setMouseWheelEnabled(true);
 
 		return chartPanel;
@@ -121,7 +127,8 @@ public class GraphCharts {
 	static void updateDataBasicChartByYear() {
 		//System.out.println("Entered updateDataBasicChartByYear()");
 		/** Start Scatter Plot */
-		XYSeries series = new XYSeries("Average temperature per year"); // Init series
+		XYSeries series1 = new XYSeries("Average Temperature per year");
+		XYSeries series2 = new XYSeries("Average temperature per year"); // Init series
 		/** End Scatter Plot */
 		Map<String, Double> entries = new LinkedHashMap<>();
 		List<Double> entriesList = new ArrayList<>();
@@ -162,9 +169,9 @@ public class GraphCharts {
 			average = average/count;
 			//entriesAvg.add(average);
 			/** I do the substring(0, 4) because each year will be 1750-01-01, 1751-01-01 etc. -> to shorten to 1750, 1751 etc. */
-			datasetBasicLineChartByYear.addValue(average, "Average temperature per year", ((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4));
+			series1.add(Double.parseDouble(((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4)), average);
 			/** Start Scatter Plot */
-			series.add(Integer.parseInt(((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4)), average); // add elements
+			series2.add(Integer.parseInt(((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4)), average); // add elements
 			/** End Scatter Plot */
 			average = 0;
 			count = 0;
@@ -173,7 +180,8 @@ public class GraphCharts {
 		}
 
 		/** Start Scatter Plot */
-		((XYSeriesCollection) datasetBasicScatterPlotByYear).addSeries(series); // add series to dataset
+		((XYSeriesCollection) datasetBasicLineChartByYear).addSeries(series1); // add series to dataset
+		((XYSeriesCollection) datasetBasicScatterPlotByYear).addSeries(series2); // add series to dataset
 
 		/** Begin trend display */
 		/** @see https://stackoverflow.com/a/61398612/13772184 */
@@ -181,9 +189,9 @@ public class GraphCharts {
 		double b = coefficients[0]; // intercept
 		double m = coefficients[1]; // slope
 		XYSeries trend = new XYSeries("Trend");
-		double x = series.getDataItem(0).getXValue();
+		double x = series2.getDataItem(0).getXValue();
 		trend.add(x, m * x + b);
-		x = series.getDataItem(series.getItemCount() - 1).getXValue();
+		x = series2.getDataItem(series2.getItemCount() - 1).getXValue();
 		trend.add(x, m * x + b);
 		//System.out.println(SwingUtilities.isEventDispatchThread()); // prints true
 		datasetBasicScatterPlotByYear.addSeries(trend);
@@ -194,17 +202,17 @@ public class GraphCharts {
 	static ChartPanel basicScatterPlotByYear() {
 		datasetBasicScatterPlotByYear = new XYSeriesCollection();
 
-		JFreeChart scatterPlot = ChartFactory.createScatterPlot("Average Temperatures 1750-2015", "Year", "Average Temperature \u00B0C", datasetBasicScatterPlotByYear, PlotOrientation.VERTICAL, true, true, false);
+		charts[2] = ChartFactory.createScatterPlot("Average Temperatures 1750-2015", "Year", "Average Temperature \u00B0C", datasetBasicScatterPlotByYear, PlotOrientation.VERTICAL, true, true, false);
 
 		/** @see https://stackoverflow.com/a/61398612/13772184 */
-		XYPlot plot = scatterPlot.getXYPlot();
+		XYPlot plot = charts[2].getXYPlot();
 		XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
 		r.setSeriesLinesVisible(1, Boolean.TRUE);
 		r.setSeriesShapesVisible(1, Boolean.FALSE);
 		plot.setDomainPannable(true);
 		plot.setRangePannable(true);
 
-		ChartPanel chartPanel = new ChartPanel(scatterPlot);
+		ChartPanel chartPanel = new ChartPanel(charts[2]);
 		chartPanel.setMouseWheelEnabled(true);
 
 		return chartPanel;
@@ -213,17 +221,17 @@ public class GraphCharts {
 	static ChartPanel basicScatterPlotCoolingDec() {
 		datasetBasicScatterPlotCoolingDec = new XYSeriesCollection();
 
-		JFreeChart scatterPlot = ChartFactory.createScatterPlot("December Temperatures 1750-2015", "Year", "Temperature \u00B0C", datasetBasicScatterPlotCoolingDec, PlotOrientation.VERTICAL, true, true, false);
+		charts[3] = ChartFactory.createScatterPlot("December Temperatures 1750-2015", "Year", "Temperature \u00B0C", datasetBasicScatterPlotCoolingDec, PlotOrientation.VERTICAL, true, true, false);
 
 		/** @see https://stackoverflow.com/a/61398612/13772184 */
-		XYPlot plot = scatterPlot.getXYPlot();
+		XYPlot plot = charts[3].getXYPlot();
 		XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
 		r.setSeriesLinesVisible(1, Boolean.TRUE);
 		r.setSeriesShapesVisible(1, Boolean.FALSE);
 		plot.setDomainPannable(true);
 		plot.setRangePannable(true);
 
-		ChartPanel chartPanel = new ChartPanel(scatterPlot);
+		ChartPanel chartPanel = new ChartPanel(charts[3]);
 		chartPanel.setMouseWheelEnabled(true);
 
 		return chartPanel;
@@ -285,17 +293,17 @@ public class GraphCharts {
 	static ChartPanel basicScatterPlotCoolingJun() {
 		datasetBasicScatterPlotCoolingJun = new XYSeriesCollection();
 
-		JFreeChart scatterPlot = ChartFactory.createScatterPlot("June Temperatures 1750-2015", "Year", "Temperature \u00B0C", datasetBasicScatterPlotCoolingJun, PlotOrientation.VERTICAL, true, true, false);
+		charts[4] = ChartFactory.createScatterPlot("June Temperatures 1750-2015", "Year", "Temperature \u00B0C", datasetBasicScatterPlotCoolingJun, PlotOrientation.VERTICAL, true, true, false);
 
 		/** @see https://stackoverflow.com/a/61398612/13772184 */
-		XYPlot plot = scatterPlot.getXYPlot();
+		XYPlot plot = charts[4].getXYPlot();
 		XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
 		r.setSeriesLinesVisible(1, Boolean.TRUE);
 		r.setSeriesShapesVisible(1, Boolean.FALSE);
 		plot.setDomainPannable(true);
 		plot.setRangePannable(true);
 
-		ChartPanel chartPanel = new ChartPanel(scatterPlot);
+		ChartPanel chartPanel = new ChartPanel(charts[4]);
 		chartPanel.setMouseWheelEnabled(true);
 
 		return chartPanel;
@@ -358,10 +366,10 @@ public class GraphCharts {
 	static ChartPanel basicBarChartByCountry() {
 		datasetBasicBarChartByCountry = new DefaultCategoryDataset();
 
-		JFreeChart barChart = ChartFactory.createBarChart("Countries with Highest Overall Temperatures", "Country", "Average Temperature \u00B0C", datasetBasicBarChartByCountry, PlotOrientation.VERTICAL, true, true, false);
+		charts[5] = ChartFactory.createBarChart("Countries with Highest Overall Temperatures", "Country", "Average Temperature \u00B0C", datasetBasicBarChartByCountry, PlotOrientation.VERTICAL, true, true, false);
 
 		/** @see https://stackoverflow.com/a/61398612/13772184 */
-		CategoryPlot plot = barChart.getCategoryPlot();
+		CategoryPlot plot = charts[5].getCategoryPlot();
 		plot.setRangePannable(true);
 		
 		CategoryItemRenderer renderer = plot.getRenderer(); 
@@ -373,7 +381,7 @@ public class GraphCharts {
 		/** Default item label is above the bar. Use below method for inside bar. */
 		//renderer.setDefaultPositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.TOP_CENTER));
 
-		ChartPanel chartPanel = new ChartPanel(barChart);
+		ChartPanel chartPanel = new ChartPanel(charts[5]);
 		chartPanel.setMouseWheelEnabled(true);
 
 		return chartPanel;
@@ -466,10 +474,10 @@ public class GraphCharts {
 	static ChartPanel doubleBarChartByCountryGreatest() {
 		datasetDoubleBarChartByCountryGreatest = new DefaultCategoryDataset();
 
-		JFreeChart barChart = ChartFactory.createBarChart("Countries with Greatest Change In Temperature Over a Century (1912-2012)", "Country", "Average Temperature \u00B0C", datasetDoubleBarChartByCountryGreatest, PlotOrientation.HORIZONTAL, true, true, false);
+		charts[6] = ChartFactory.createBarChart("Countries with Greatest Change In Temperature Over a Century (1912-2012)", "Country", "Average Temperature \u00B0C", datasetDoubleBarChartByCountryGreatest, PlotOrientation.HORIZONTAL, true, true, false);
 
 		/** @see https://stackoverflow.com/a/61398612/13772184 */
-		CategoryPlot plot = barChart.getCategoryPlot();
+		CategoryPlot plot = charts[6].getCategoryPlot();
 		plot.setRangePannable(true);
 		//Font font = new Font("SansSerif", Font.BOLD, 15);
 		//plot.getDomainAxis().setTickLabelFont(font);
@@ -488,7 +496,7 @@ public class GraphCharts {
 		/** Default item label is above the bar. Use below method for inside bar. */
 		//renderer.setDefaultPositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.TOP_CENTER));
 
-		ChartPanel chartPanel = new ChartPanel(barChart);
+		ChartPanel chartPanel = new ChartPanel(charts[6]);
 		chartPanel.setMouseWheelEnabled(true);
 
 		return chartPanel;
@@ -497,10 +505,10 @@ public class GraphCharts {
 	static ChartPanel doubleBarChartByCountryLeast() {
 		datasetDoubleBarChartByCountryLeast = new DefaultCategoryDataset();
 
-		JFreeChart barChart = ChartFactory.createBarChart("Countries with Least Change In Temperature Over a Century (1912-2012)", "Country", "Average Temperature \u00B0C", datasetDoubleBarChartByCountryLeast, PlotOrientation.HORIZONTAL, true, true, false);
+		charts[7] = ChartFactory.createBarChart("Countries with Least Change In Temperature Over a Century (1912-2012)", "Country", "Average Temperature \u00B0C", datasetDoubleBarChartByCountryLeast, PlotOrientation.HORIZONTAL, true, true, false);
 
 		/** @see https://stackoverflow.com/a/61398612/13772184 */
-		CategoryPlot plot = barChart.getCategoryPlot();
+		CategoryPlot plot = charts[7].getCategoryPlot();
 		plot.setRangePannable(true);
 		//Font font = new Font("SansSerif", Font.BOLD, 15);
 		//plot.getDomainAxis().setTickLabelFont(font);
@@ -521,7 +529,7 @@ public class GraphCharts {
 		/** Default item label is above the bar. Use below method for inside bar. */
 		//renderer.setDefaultPositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.TOP_CENTER));
 
-		ChartPanel chartPanel = new ChartPanel(barChart);
+		ChartPanel chartPanel = new ChartPanel(charts[7]);
 		chartPanel.setMouseWheelEnabled(true);
 
 		return chartPanel;
@@ -666,10 +674,10 @@ public class GraphCharts {
 	static ChartPanel multiXYLineChartByEconomy() {
 		datasetMultiLineChartByEconomy = new XYSeriesCollection();
 
-		linePlot = ChartFactory.createXYLineChart("Average Temperatures of Top 5 World Economies (1900-2012)", "Year", "Average Temperature \u00B0C", datasetMultiLineChartByEconomy, PlotOrientation.VERTICAL, true, true, false);
+		charts[8] = ChartFactory.createXYLineChart("Average Temperatures of Top 5 World Economies (1900-2012)", "Year", "Average Temperature \u00B0C", datasetMultiLineChartByEconomy, PlotOrientation.VERTICAL, true, true, false);
 
 		/** @see https://stackoverflow.com/a/61398612/13772184 */
-		XYPlot plot = linePlot.getXYPlot();
+		XYPlot plot = charts[8].getXYPlot();
 		XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
 		r.setSeriesLinesVisible(1, Boolean.TRUE);
 		r.setSeriesShapesVisible(1, Boolean.FALSE);
@@ -677,7 +685,7 @@ public class GraphCharts {
 		plot.setDomainPannable(true);
 		plot.setRangePannable(true);
 
-		ChartPanel chartPanel = new ChartPanel(linePlot);
+		ChartPanel chartPanel = new ChartPanel(charts[8]);
 		chartPanel.setMouseWheelEnabled(true);
 
         CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
@@ -733,7 +741,7 @@ public class GraphCharts {
 	}
 	
 	static void updateMultiXYLineChartByEconomy() {
-		XYPlot plot = linePlot.getXYPlot();
+		XYPlot plot = charts[8].getXYPlot();
 		XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
 		
 		double[] averages = new double[5];

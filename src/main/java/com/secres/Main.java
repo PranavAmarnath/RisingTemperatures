@@ -183,9 +183,7 @@ public class Main {
 		System.setProperty("apple.awt.textantialiasing", "true");
 		
 		if(System.getProperty("os.name").toString().contains("Mac")) {
-			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				
+			try {				
 				SwingUtilities.invokeLater(() -> {
 					Desktop desktop = Desktop.getDesktop();
 					
@@ -201,9 +199,7 @@ public class Main {
 				});
 			} catch (Exception e) { e.printStackTrace(); }
 		}
-		else {
-			FlatLightLaf.install();
-		}
+		FlatLightLaf.install();
 		//UIManager.put("ScrollBar.thumbArc", 999);
 		//UIManager.put("ScrollBar.thumbInsets", new Insets(2, 2, 2, 2));
 		//UIManager.put("ScrollBar.width", 13);

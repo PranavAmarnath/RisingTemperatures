@@ -28,6 +28,8 @@ import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.jfree.chart.StandardChartTheme;
+
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
@@ -67,25 +69,28 @@ public class View {
 	private JSplitPane splitPane;
 	private JScrollPane treeScroll;
 	private JScrollPane tableGlobalScroll, tableCountryScroll;
+	
 	private JTree componentTree;
 	private DefaultMutableTreeNode root, dataRootNode, globalTableNode, countryTableNode;
 	private DefaultMutableTreeNode graphRootNode;
 	private DefaultMutableTreeNode globalNode, basicLineNode, basicLineByYearNode, basicScatterByYearNode, basicScatterCoolingDecNode, basicScatterCoolingJunNode;
 	private DefaultMutableTreeNode countryNode, basicBarNode, doubleBarGreatestNode, doubleBarLeastNode, multiLineEconomyNode;
+	
 	private static JTable tableGlobalData, tableCountryData;
+	
 	private JMenuBar menuBar;
 	private JMenu file, view;
 	private ButtonGroup viewGroup;
 	private JMenuItem about, preferences, close;
 	private JMenuItem light, dark;
 	private static JMenuItem nimbus;
-	static boolean nimbusEnabled = false;
-
+	private static boolean nimbusEnabled = false;
 	private JMenuItem system;
+	
 	private FlatLightLaf lightLaf = new FlatLightLaf();
-	private FlatIntelliJLaf intellijLaf = new FlatIntelliJLaf();
 	private FlatDarkLaf darkLaf = new FlatDarkLaf();
-	private FlatDarculaLaf darculaLaf = new FlatDarculaLaf();
+	//private StandardChartTheme themeLight = (StandardChartTheme) StandardChartTheme.createJFreeTheme();
+	//private StandardChartTheme themeDark = (StandardChartTheme) StandardChartTheme.createDarknessTheme();
 	
 	private final static String LICENSE = "MIT License\n"
 			+ "\n"
@@ -154,40 +159,38 @@ public class View {
 		light = new JRadioButtonMenuItem("Light");
 		light.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if((System.getProperty("os.name").toString()).contains("Mac")) {
-					try {
-						UIManager.setLookAndFeel(intellijLaf);
-					} catch (UnsupportedLookAndFeelException e1) {
-						e1.printStackTrace();
-					}
+				try {
+					UIManager.setLookAndFeel(lightLaf);
+				} catch (UnsupportedLookAndFeelException e1) {
+					e1.printStackTrace();
 				}
-				else {
+				/*// causes series paint to go back to default
+				SwingUtilities.updateComponentTreeUI(frame);
+				for(int i = 0; i < GraphCharts.charts.length; i++) {
 					try {
-						UIManager.setLookAndFeel(lightLaf);
-					} catch (UnsupportedLookAndFeelException e1) {
-						e1.printStackTrace();
-					}
+						themeLight.apply(GraphCharts.charts[i]);
+					} catch(Exception e1) { }
 				}
+				*/
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
 		dark = new JRadioButtonMenuItem("Dark");
 		dark.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if((System.getProperty("os.name").toString()).contains("Mac")) {
-					try {
-						UIManager.setLookAndFeel(darculaLaf);
-					} catch (UnsupportedLookAndFeelException e1) {
-						e1.printStackTrace();
-					}
+				try {
+					UIManager.setLookAndFeel(darkLaf);
+				} catch (UnsupportedLookAndFeelException e1) {
+					e1.printStackTrace();
 				}
-				else {
+				/*// causes series paint to go back to default
+				SwingUtilities.updateComponentTreeUI(frame);
+				for(int i = 0; i < GraphCharts.charts.length; i++) {
 					try {
-						UIManager.setLookAndFeel(darkLaf);
-					} catch (UnsupportedLookAndFeelException e1) {
-						e1.printStackTrace();
-					}
+						themeDark.apply(GraphCharts.charts[i]);
+					} catch(Exception e1) { }
 				}
+				*/
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
@@ -205,7 +208,18 @@ public class View {
 				} catch (Exception e1) {
 				    // If Nimbus is not available, you can set the GUI to another look and feel.
 					JOptionPane.showMessageDialog(frame, "Nimbus is not available! Requires JRE 6 or later.", "Error", JOptionPane.ERROR_MESSAGE);
+					try {
+						UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+					} catch (Exception e2) {}
 				}
+				/*// causes series paint to go back to default
+				SwingUtilities.updateComponentTreeUI(frame);
+				for(int i = 0; i < GraphCharts.charts.length; i++) {
+					try {
+						themeLight.apply(GraphCharts.charts[i]);
+					} catch(Exception e1) { }
+				}
+				*/
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
@@ -223,6 +237,14 @@ public class View {
 				} catch (Exception e3) {
 					e3.printStackTrace();
 				}
+				/*// causes series paint to go back to default
+				SwingUtilities.updateComponentTreeUI(frame);
+				for(int i = 0; i < GraphCharts.charts.length; i++) {
+					try {
+						themeLight.apply(GraphCharts.charts[i]);
+					} catch(Exception e1) { }
+				}
+				*/
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
@@ -233,12 +255,7 @@ public class View {
 		view.add(system);
 		viewGroup = new ButtonGroup();
 		viewGroup.add(light);
-		if(System.getProperty("os.name").toString().contains("Mac")) {
-			system.setSelected(true);
-		}
-		else {
-			light.setSelected(true);
-		}
+		light.setSelected(true);
 		viewGroup.add(dark);
 		viewGroup.add(nimbus);
 		viewGroup.add(system);
@@ -270,6 +287,16 @@ public class View {
 				createQuit(frame);
 			}
 		});
+		
+		/*
+		JButton helpButton = new JButton();
+		helpButton.setToolTipText("Help");
+		helpButton.putClientProperty("JButton.buttonType", "help");
+		helpButton.setMaximumSize(new Dimension(10, 10));
+		JToolBar toolBar = new JToolBar();
+		toolBar.add(helpButton);
+		frame.add(toolBar, BorderLayout.NORTH);
+		*/
 		
 		mainPanel = new JPanel(new BorderLayout());
 		frame.add(mainPanel);
@@ -592,7 +619,7 @@ public class View {
 		//textPanel.add(text3Panel);
 		mainPanel.add(textPanel, BorderLayout.SOUTH);
 		
-		JOptionPane.showMessageDialog(frame, mainPanel, "About", JOptionPane.PLAIN_MESSAGE);
+		JOptionPane.showOptionDialog(frame, mainPanel, "About", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{}, null);
 	}
 	
 	static void createPreferences() {
@@ -602,8 +629,11 @@ public class View {
 	static void createPreferences(JFrame frame) {
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		JPanel prefPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JCheckBox enableNimbus = new JCheckBox("Nimbus Theme (WARNING)");
+		JPanel northPanel = new JPanel();
+		northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.Y_AXIS));
+		JCheckBox enableNimbus = new JCheckBox("Nimbus Theme (Warning)");
 		enableNimbus.setSelected(nimbusEnabled);
+		enableNimbus.setToolTipText("Enable Nimbus Theme");
 		enableNimbus.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -618,7 +648,21 @@ public class View {
 			}
 		});
 		prefPanel.add(enableNimbus);
-		mainPanel.add(prefPanel, BorderLayout.NORTH);
+		northPanel.add(prefPanel);
+		
+		JButton helpButton = new JButton();
+		helpButton.setToolTipText("Help");
+		helpButton.putClientProperty("JButton.buttonType", "help");
+		helpButton.addActionListener(e -> {
+			try {
+			    Desktop.getDesktop().browse(new URL("https://github.com/PranavAmarnath/RisingTemperatures").toURI());
+			} catch (Exception e1) { e1.printStackTrace(); }
+		});
+		JPanel helpPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		helpPanel.add(helpButton);
+		northPanel.add(helpPanel);
+		
+		mainPanel.add(northPanel, BorderLayout.NORTH);
 		
 		JTextPane textPane = new JTextPane();
 		textPane.setEditable(false);
@@ -629,9 +673,11 @@ public class View {
 		SimpleAttributeSet headers = new SimpleAttributeSet();
 		StyleConstants.setBold(headers, true);
 		StyleConstants.setFontSize(headers, 17);
+		StyleConstants.setForeground(headers, Color.RED);
 		
 		SimpleAttributeSet text = new SimpleAttributeSet();
 		StyleConstants.setFontSize(text, 14);
+		StyleConstants.setForeground(text, Color.BLUE);
 		
 		try {
 			doc.insertString(doc.getLength(), "Table Info:\n", headers);
@@ -643,14 +689,15 @@ public class View {
 		}
 		
 		try {
-			doc.insertString(doc.getLength(), "Graph Info:\n", headers);
+			doc.insertString(doc.getLength(), "Graph How-to (Interactive):\n", headers);
 			doc.insertString(doc.getLength(), "Right-click on any graph for more preferences.\n", text);
 			doc.insertString(doc.getLength(), "Ctrl-press on any graph to pan.\n", text);
 			doc.insertString(doc.getLength(), "Scroll the mouse on any graph to zoom.\n", text);
 			doc.insertString(doc.getLength(), "Drag on any graph from top left to bottom right to select a zoomed-in portion.\n", text);
 			//System.out.println(SwingUtilities.isEventDispatchThread());
 			doc.insertString(doc.getLength(), "Drag the mouse up and release (~1 sec.) to exit zoomed state.\n", text);
-			doc.insertString(doc.getLength(), "Hover the mouse over any point/bar etc. to view the value.\n", headers);
+			doc.insertString(doc.getLength(), "Hover the mouse over any point/bar etc. to view the value.\n", text);
+			doc.insertString(doc.getLength(), "<b>Warning:<b> Dark mode is in beta without support for charts.\n", text);
 		} catch (BadLocationException e1) {
 			e1.printStackTrace();
 		}
@@ -666,12 +713,15 @@ public class View {
     	if(input == 0) {
     		System.exit(0);
         }
+    	else {
+    		frame.setVisible(true);
+    	}
 	}
 	
 	static void createQuit(JFrame frame) {
 		int input = JOptionPane.showConfirmDialog(frame, "Do you want to quit?", "Quit", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
     	if(input == 0) {
-    		frame.dispose();
+    		System.exit(0);
         }
     	else {
     		frame.setVisible(true);
