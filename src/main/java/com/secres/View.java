@@ -16,8 +16,6 @@ import java.net.URL;
 
 import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -30,9 +28,7 @@ import javax.swing.tree.TreeSelectionModel;
 
 import org.jfree.chart.StandardChartTheme;
 
-import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 
 /**
@@ -92,6 +88,7 @@ public class View {
 	//private StandardChartTheme themeLight = (StandardChartTheme) StandardChartTheme.createJFreeTheme();
 	//private StandardChartTheme themeDark = (StandardChartTheme) StandardChartTheme.createDarknessTheme();
 	
+	/*
 	private final static String LICENSE = "MIT License\n"
 			+ "\n"
 			+ "Copyright \u00a9 2020-2021 Pranav Amarnath\n"
@@ -114,6 +111,7 @@ public class View {
 			+ "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n"
 			+ "SOFTWARE.\n"
 			+ "";
+	*/
 	
 	public View() {
 		createAndShowGUI();
@@ -483,6 +481,7 @@ public class View {
 		splitPane.setResizeWeight(0.25);
 		splitPane.setDividerLocation(0.25);
 		//frame.setLocationByPlatform(true);
+		//frame.setVisible(true);
 	}
 	
 	private DefaultMutableTreeNode setTreeModel() {
@@ -605,7 +604,7 @@ public class View {
 		
 		JPanel text1Panel = new JPanel();
 		JPanel text2Panel = new JPanel();
-		JPanel text3Panel = new JPanel();
+		//JPanel text3Panel = new JPanel();
 		JLabel text1 = new JLabel("Version 1.0", SwingConstants.CENTER);
 		text1Panel.add(text1);
 		JLabel text2 = new JLabel("<html>Copyright \u00a9 2020-2021 Pranav Amarnath<br><div style='text-align: center;'>All Rights Reserved.</div></html>", SwingConstants.CENTER);
@@ -650,13 +649,19 @@ public class View {
 		prefPanel.add(enableNimbus);
 		northPanel.add(prefPanel);
 		
-		JButton helpButton = new JButton();
+		JButton helpButton = new JButton("Help");
 		helpButton.setToolTipText("Help");
 		helpButton.putClientProperty("JButton.buttonType", "help");
+		JTextArea textArea = new JTextArea();
+		textArea.setEditable(false);
+		textArea.setText("An error occurred.\nThe current system does not support Desktop.\nRefer to this link instead:\nhttps://github.com/PranavAmarnath/RisingTemperatures");
 		helpButton.addActionListener(e -> {
 			try {
 			    Desktop.getDesktop().browse(new URL("https://github.com/PranavAmarnath/RisingTemperatures").toURI());
-			} catch (Exception e1) { e1.printStackTrace(); }
+			} catch (Exception e1) {
+				JOptionPane.showMessageDialog(frame, textArea, "Error", JOptionPane.ERROR_MESSAGE);
+				e1.printStackTrace();
+			}
 		});
 		JPanel helpPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		helpPanel.add(helpButton);
@@ -684,7 +689,7 @@ public class View {
 			doc.insertString(doc.getLength(), "Double click over a cell to copy text.\n", text);
 			doc.insertString(doc.getLength(), "Press Ctrl-C to copy multiple cells or row(s).\n", text);
 			doc.insertString(doc.getLength(), "Hover over the table for similar info.\n", text);
-		} catch (Exception e) {
+		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
 		
@@ -697,9 +702,9 @@ public class View {
 			//System.out.println(SwingUtilities.isEventDispatchThread());
 			doc.insertString(doc.getLength(), "Drag the mouse up and release (~1 sec.) to exit zoomed state.\n", text);
 			doc.insertString(doc.getLength(), "Hover the mouse over any point/bar etc. to view the value.\n", text);
-			doc.insertString(doc.getLength(), "<b>Warning:<b> Dark mode is in beta without support for charts.\n", text);
-		} catch (BadLocationException e1) {
-			e1.printStackTrace();
+			doc.insertString(doc.getLength(), "Warning: Dark mode is in beta without support for charts.\n", text);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
 		}
 
 		JScrollPane scrollPane = new JScrollPane(textPane);

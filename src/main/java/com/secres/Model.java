@@ -41,7 +41,7 @@ public class Model {
 				try {
 					header = (String[]) reader.readNext();
 					SwingUtilities.invokeAndWait(() -> model = new DefaultTableModel(header, 0)); // NOT invokeLater() because model HAS to be initialized immediately on EDT
-					if(path.equals(LASTDATASET)) { // final dataset
+					if(path.equals(LASTDATASET)) { // Start read on final dataset so that there's only one View instance
 						//System.out.println("Create View");
 						Main.verifyStartRead();
 					}

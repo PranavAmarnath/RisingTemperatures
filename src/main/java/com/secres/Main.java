@@ -3,11 +3,15 @@ package com.secres;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.swing.*;
+
+import org.jfree.chart.JFreeChart;
+
 import com.formdev.flatlaf.*;
 
 /**
@@ -19,10 +23,11 @@ import com.formdev.flatlaf.*;
 public class Main {
 
 	static Model modelGlobal, modelCountry;
-	private static View view;
+	//private static View view;
 	private static JWindow splash;
 	private static JProgressBar pb;
-	private int seconds = 30;
+	/** Time for read/splash */
+	private int seconds = 20;
 	
 	public Main() {
 		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
@@ -41,9 +46,11 @@ public class Main {
 		modelGlobal = new Model("/GlobalTemperatures.csv");
 		modelCountry = new Model("/GlobalLandTemperaturesByCountry.csv");
 		/**
-		// For fixed splash time (5 seconds) irrespective of finished parsing through data -> ..
-		// ..will not work always if model is not done by the time the worker ends, this depends on the data..
-		// ..comment if using dynamic option
+		 * For fixed splash time (5 seconds) irrespective of finished parsing through data -> ..
+		 * ..will not work always if model is not done by the time the worker ends, this depends on the data..
+		 * ..comment if using dynamic option
+		 */
+		/*
 		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 			protected Void doInBackground() throws Exception {
 				Thread.sleep(5000);
@@ -104,7 +111,7 @@ public class Main {
 	private static void createView() {
 		//splash.dispose();
 		SwingUtilities.invokeLater(() -> {
-			view = new View();
+			new View();
 		});
 	}
 	
@@ -140,26 +147,23 @@ public class Main {
 		GraphCharts.updateDataBasicChartByYear();
 		GraphCharts.updateScatterPlotCoolingDec();
 		GraphCharts.updateScatterPlotCoolingJun();
+		GraphCharts.updateBasicBarChartByCountry();
 		/** For longer reads, using SwingWorker */
 		new SwingWorker<Void, Void>() {
 			@Override
 			protected Void doInBackground() throws Exception {
-				GraphCharts.updateBasicBarChartByCountry();
 				GraphCharts.updateDoubleBarChartByCountry();
 				GraphCharts.updateMultiXYLineChartByEconomy();
 				return null;
 			}
+			/*
 			@Override
 			protected void done() {
-				Main.getPB().setValue(100);
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				splash.dispose();
+				getPB().setValue(100);
+				getSplash().dispose();
 				View.getFrame().setVisible(true);
 			}
+			*/
 		}.execute();
 		
  	}
@@ -204,6 +208,7 @@ public class Main {
 		//UIManager.put("ScrollBar.thumbInsets", new Insets(2, 2, 2, 2));
 		//UIManager.put("ScrollBar.width", 13);
 		//UIManager.put("SplitPaneDivider.style", "plain");
+		//UIManager.put("TabbedPane.selectedBackground", new Color(218, 228, 237));
 		SwingUtilities.invokeLater(() -> {
 			new Main();
 		});
