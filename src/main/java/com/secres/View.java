@@ -114,10 +114,10 @@ public class View {
 	*/
 	
 	public View() {
-		createAndShowGUI();
+		createGUI();
 	}
 	
-	private void createAndShowGUI() {
+	private void createGUI() {
 		frame = new JFrame("Secres GUI") {
 			public Dimension getPreferredSize() {
 				return new Dimension(800, 600);

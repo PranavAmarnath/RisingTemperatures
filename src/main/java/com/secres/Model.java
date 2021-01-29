@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 import javax.swing.JOptionPane;
+import javax.swing.RepaintManager;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
@@ -101,7 +102,7 @@ public class Model {
 			*/
 			protected void done() {
 				try {
-					Main.getPB().setValue(Main.getPB().getValue() + 10);
+					Main.getPB().setValue(Main.getPB().getValue() + 15);
 					reader.close();
 					//System.out.println("Finished model");
 					/*

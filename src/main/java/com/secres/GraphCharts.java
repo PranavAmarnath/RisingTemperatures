@@ -7,6 +7,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.CategoryItemLabelGenerator;
 import org.jfree.chart.labels.ItemLabelAnchor;
@@ -21,9 +22,15 @@ import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.TextAnchor;
+import org.jfree.chart.util.DefaultShadowGenerator;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.statistics.Regression;
+import org.jfree.data.time.Month;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.time.Year;
+import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -36,6 +43,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.geom.Rectangle2D;
 import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
@@ -55,7 +63,7 @@ import javax.swing.SwingWorker;
 public class GraphCharts {
 
 	//private static DefaultCategoryDataset datasetBasicLineChart, datasetBasicLineChartByYear;
-	private static XYSeriesCollection datasetBasicLineChart, datasetBasicLineChartByYear;
+	private static TimeSeriesCollection datasetBasicLineChart, datasetBasicLineChartByYear;
 	private static XYSeriesCollection datasetBasicScatterPlotByYear, datasetBasicScatterPlotCoolingDec, datasetBasicScatterPlotCoolingJun;
 	private static XYSeriesCollection datasetMultiLineChartByEconomy;
 	private static DefaultCategoryDataset datasetBasicBarChartByCountry, datasetDoubleBarChartByCountryGreatest, datasetDoubleBarChartByCountryLeast;
@@ -68,7 +76,7 @@ public class GraphCharts {
 	 */
 	
 	static ChartPanel basicLineChart() {
-		datasetBasicLineChart = new XYSeriesCollection();
+		datasetBasicLineChart = new TimeSeriesCollection();
 		/*// dummy data
 		dataset.addValue( 15 , "schools" , "1970" );
 		dataset.addValue( 30 , "schools" , "1980" );
@@ -78,11 +86,15 @@ public class GraphCharts {
 		dataset.addValue( 300 , "schools" , "2014" );
 		*/
 
-		charts[0] = ChartFactory.createXYLineChart("All Temperatures 1750-2015", "Date", "Temperature", datasetBasicLineChart, PlotOrientation.VERTICAL, true, true, false);
+		charts[0] = ChartFactory.createTimeSeriesChart("All Temperatures 1750-2015", "Date", "Temperature", datasetBasicLineChart, true, true, false);
 		charts[0].setNotify(false);
+		
 		XYPlot allLinePlot = (XYPlot) charts[0].getXYPlot();
 		allLinePlot.setDomainPannable(true);
-		allLinePlot.setRangePannable(true);		
+		allLinePlot.setRangePannable(true);
+		
+		DateAxis axis = (DateAxis) allLinePlot.getDomainAxis();
+        axis.setDateFormatOverride(new SimpleDateFormat("yyyy-MMM"));
 
 		ChartPanel chartPanel = new ChartPanel(charts[0]);
 		chartPanel.setMouseWheelEnabled(true);
@@ -92,11 +104,11 @@ public class GraphCharts {
 	}
 
 	static void updateDataBasicLineChart() {
-		XYSeries basicLine = new XYSeries("Temperature over time");
+		TimeSeries basicLine = new TimeSeries("Temperature over time");
 		//System.out.println("Entered updateDataBasicLineChart()");
 		for(int i = 0; i < View.getGlobalTable().getModel().getRowCount(); i++) {
 			if(!(((String)View.getGlobalTable().getModel().getValueAt(i, 1)).equals(""))) {
-				basicLine.add(Double.parseDouble(((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4)), Double.parseDouble((String)View.getGlobalTable().getModel().getValueAt(i, 1)));
+				basicLine.add(new Month(Integer.parseInt(((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(5, 7)), Integer.parseInt(((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4))), Double.parseDouble((String)View.getGlobalTable().getModel().getValueAt(i, 1)));
 			}
 		}
 		datasetBasicLineChart.addSeries(basicLine);
@@ -104,7 +116,7 @@ public class GraphCharts {
 	}
 
 	static ChartPanel basicLineChartByYear() {
-		datasetBasicLineChartByYear = new XYSeriesCollection();
+		datasetBasicLineChartByYear = new TimeSeriesCollection();
 		/*// dummy data
 		dataset.addValue( 15 , "schools" , "1970" );
 		dataset.addValue( 30 , "schools" , "1980" );
@@ -114,21 +126,16 @@ public class GraphCharts {
 		dataset.addValue( 300 , "schools" , "2014" );
 		*/
 
-		charts[1] = ChartFactory.createXYLineChart("Average Temperatures 1750-2015", "Year", "Average Temperature \u00B0C", datasetBasicLineChartByYear, PlotOrientation.VERTICAL, true, true, false);
+		charts[1] = ChartFactory.createTimeSeriesChart("Average Temperatures 1750-2015", "Year", "Average Temperature \u00B0C", datasetBasicLineChartByYear, true, true, false);
 		charts[1].setNotify(false);
 		//allLineChart.getCategoryPlot().getRangeAxis().setLowerBound(6.0);
 		//allLineChart.getCategoryPlot().getRangeAxis().setUpperBound(12.0);
 		XYPlot allLinePlot = (XYPlot) charts[1].getXYPlot();
 		allLinePlot.setDomainPannable(true);
 		allLinePlot.setRangePannable(true);
-
-		/*
-		CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
-		Crosshair crosshairDomain = new Crosshair(Double.NaN, Color.DARK_GRAY, new BasicStroke(0f));
-		Crosshair crosshairRange = new Crosshair(Double.NaN, Color.DARK_GRAY, new BasicStroke(0f));
-		crosshairOverlay.addDomainCrosshair(crosshairDomain);
-		crosshairOverlay.addRangeCrosshair(crosshairRange);
-		*/
+		
+		DateAxis axis = (DateAxis) allLinePlot.getDomainAxis();
+        axis.setDateFormatOverride(new SimpleDateFormat("yyyy"));
 		//System.out.println(SwingUtilities.isEventDispatchThread()); // prints true
 
 		ChartPanel chartPanel = new ChartPanel(charts[1]);
@@ -140,10 +147,10 @@ public class GraphCharts {
 	static void updateDataBasicChartByYear() {
 		//System.out.println("Entered updateDataBasicChartByYear()");
 		/** Start Scatter Plot */
-		XYSeries series1 = new XYSeries("Average Temperature per year");
+		TimeSeries series1 = new TimeSeries("Average Temperature per year");
 		XYSeries series2 = new XYSeries("Average Temperature per year"); // Init series
 		/** End Scatter Plot */
-		Map<String, Double> entries = new LinkedHashMap<>();
+		//Map<String, Double> entries = new LinkedHashMap<>();
 		//List<Double> entriesList = new ArrayList<>();
 		double average = 0;
 		int count = 0;
@@ -151,7 +158,6 @@ public class GraphCharts {
 		XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
 		//List<Double> entriesAvg = new ArrayList<>();
 
-		/** Start read; take average of per-year data - save in LinkedHashMap, then ArrayList, then JFreeChart datasets */
 		for(int i = 0; i < View.getGlobalTable().getModel().getRowCount(); i+=12) {
 			for(int j = 0; j < 12; j++) {
 				if((String)View.getGlobalTable().getModel().getValueAt(i+j, 1) != null && !((String)View.getGlobalTable().getModel().getValueAt(i+j, 1)).trim().isEmpty()) {
@@ -161,30 +167,10 @@ public class GraphCharts {
 					average = average + Double.parseDouble((String)View.getGlobalTable().getModel().getValueAt(i+j, 1));
 				}
 			}
-			//System.out.println(entries.size());
-			//count = 0;
-			/*
-			for(int k = 0; k < entries.size(); k++) {
-				if((String)View.getGlobalTable().getModel().getValueAt(i+k, 1) != null && !((String)View.getGlobalTable().getModel().getValueAt(i+k, 1)).trim().isEmpty()) {
-					//entriesList.add(entries.get((String)View.getGlobalTable().getModel().getValueAt(i+k, 0)));
-					count++;
-					average = average + entries.get((String)View.getGlobalTable().getModel().getValueAt(i+k, 0));
-					//System.out.println("Year: " + (String)View.getGlobalTable().getModel().getValueAt(i+k, 0) + "Average: " + average);
-				}
-			}
-			*/
-			//System.out.println(count);
-			//System.out.println(average);
-			//System.out.println(Arrays.toString(entriesList.toArray()));
-			/*
-			for(int l = 0; l < entriesList.size(); l++) {
-				average = average + entriesList.get(l);
-			}
-			*/
 			average = average/count;
 			//entriesAvg.add(average);
 			/** I do the substring(0, 4) because each year will be 1750-01-01, 1751-01-01 etc. -> to shorten to 1750, 1751 etc. */
-			series1.add(Double.parseDouble(((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4)), average);
+			series1.add(new Year(Integer.parseInt(((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4))), average);
 			/** Start Scatter Plot */
 			series2.add(Integer.parseInt(((String)View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0, 4)), average); // add elements
 			/** End Scatter Plot */
@@ -195,7 +181,7 @@ public class GraphCharts {
 		}
 
 		/** Start Scatter Plot */
-		((XYSeriesCollection) datasetBasicLineChartByYear).addSeries(series1); // add series to dataset
+		((TimeSeriesCollection) datasetBasicLineChartByYear).addSeries(series1); // add series to dataset
 		((XYSeriesCollection) datasetBasicScatterPlotByYear).addSeries(series2); // add series to dataset
 
 		/** Begin trend display */
@@ -204,9 +190,9 @@ public class GraphCharts {
 		double b = coefficients[0]; // intercept
 		double m = coefficients[1]; // slope
 		XYSeries trend = new XYSeries("Trend");
-		double x = series2.getDataItem(0).getXValue();
+		double x = (double) series2.getDataItem(0).getXValue();
 		trend.add(x, m * x + b);
-		x = series2.getDataItem(series2.getItemCount() - 1).getXValue();
+		x = (double) series2.getDataItem(series2.getItemCount() - 1).getXValue();
 		trend.add(x, m * x + b);
 		r.setSeriesStroke(1, new BasicStroke(1.5f));
 		r.setSeriesPaint(1, Color.BLACK);
@@ -216,6 +202,7 @@ public class GraphCharts {
 		/** End trend display */
 		/** End Scatter Plot */
 		charts[1].setNotify(true);
+		charts[2].setNotify(true);
 	}
 
 	static ChartPanel basicScatterPlotByYear() {
@@ -226,6 +213,7 @@ public class GraphCharts {
 		/** @see https://stackoverflow.com/a/61398612/13772184 */
 		XYPlot plot = charts[2].getXYPlot();
 		XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
+		//r.setSeriesLinesVisible(0, Boolean.TRUE);
 		r.setSeriesLinesVisible(1, Boolean.TRUE);
 		r.setSeriesShapesVisible(1, Boolean.FALSE);
 		plot.setDomainPannable(true);
@@ -274,25 +262,6 @@ public class GraphCharts {
 				//entries.put((String)View.getGlobalTable().getModel().getValueAt(i, 0), Double.parseDouble((String)View.getGlobalTable().getModel().getValueAt(i, 1)));
 				series.add(Double.parseDouble(((String) View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0,4)), Double.parseDouble((String)View.getGlobalTable().getModel().getValueAt(i, 1))); // add elements
 			}
-			//System.out.println(entries.size());
-			//int count = 0;
-			/*
-			if((String)View.getGlobalTable().getModel().getValueAt(i, 1) != null && !((String)View.getGlobalTable().getModel().getValueAt(i, 1)).trim().isEmpty()) {
-				entriesList.add(entries.get((String)View.getGlobalTable().getModel().getValueAt(i, 0)));
-				//count++;
-			}
-			*/
-			//System.out.println(Arrays.toString(entriesList.toArray()));
-			//entriesAvg.add(average);
-			/** Start Scatter Plot */
-			/*
-			for(int l = 0; l < entriesList.size(); l++) {
-				series.add(Double.parseDouble(((String) View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0,4)), entriesList.get(l)); // add elements
-			}
-			*/
-			/** End Scatter Plot */
-			//entries.clear();
-			//entriesList.clear();
 		}
 
 		/** Start Scatter Plot */
@@ -356,25 +325,6 @@ public class GraphCharts {
 				//entries.put((String)View.getGlobalTable().getModel().getValueAt(i, 0), Double.parseDouble((String)View.getGlobalTable().getModel().getValueAt(i, 1)));
 				series.add(Double.parseDouble(((String) View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0,4)), Double.parseDouble((String)View.getGlobalTable().getModel().getValueAt(i, 1))); // add elements
 			}
-			//System.out.println(entries.size());
-			//int count = 0;
-			/*
-			if((String)View.getGlobalTable().getModel().getValueAt(i, 1) != null && !((String)View.getGlobalTable().getModel().getValueAt(i, 1)).trim().isEmpty()) {
-				entriesList.add(entries.get((String)View.getGlobalTable().getModel().getValueAt(i, 0)));
-				//count++;
-			}
-			*/
-			//System.out.println(Arrays.toString(entriesList.toArray()));
-			//entriesAvg.add(average);
-			// Start Scatter Plot
-			/*
-			for(int l = 0; l < entriesList.size(); l++) {
-				series.add(Double.parseDouble(((String) View.getGlobalTable().getModel().getValueAt(i, 0)).substring(0,4)), entriesList.get(l)); // add elements
-			}
-			*/
-			// End Scatter Plot
-			//entries.clear();
-			//entriesList.clear();
 		}
 
 		// Start Scatter Plot
@@ -397,7 +347,7 @@ public class GraphCharts {
 		datasetBasicScatterPlotCoolingJun.addSeries(trend);
 		// End trend display
 		// End Scatter Plot
-		Main.getPB().setValue(Main.getPB().getValue() + 20);
+		Main.getPB().setValue(Main.getPB().getValue() + 30);
 		charts[4].setNotify(true);
 	}
 	
@@ -455,6 +405,7 @@ public class GraphCharts {
 					average = 0;
 					count = 0;
 				}
+				/** Show GUI */
 				try {
 					SwingUtilities.invokeAndWait(() -> {
 						Main.getPB().setValue(100);
@@ -474,7 +425,12 @@ public class GraphCharts {
 				for(int i = 0; i < 10; i++) { // for sortByValueDescending()
 					try {
 						if((get().get((String)get().keySet().toArray()[i])) < 100) { // Antarctica returns infinity because starts from 1950
-							datasetBasicBarChartByCountry.addValue(get().get((String)get().keySet().toArray()[i]), "Average temperature", (String)get().keySet().toArray()[i]);
+							if(((String)get().keySet().toArray()[i]).equals("United Arab Emirates")) {
+								datasetBasicBarChartByCountry.addValue(get().get((String)get().keySet().toArray()[i]), "Average temperature", "UAE");
+							}
+							else {	
+								datasetBasicBarChartByCountry.addValue(get().get((String)get().keySet().toArray()[i]), "Average temperature", (String)get().keySet().toArray()[i]);
+							}
 						}
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -683,6 +639,10 @@ public class GraphCharts {
 				if(((String)entriesDifferences.keySet().toArray()[i]).equals("Canada")) {
 					continue;
 				}
+				else if(((String)entriesDifferences.keySet().toArray()[i]).equals("Bosnia And Herzegovina")) {
+					datasetDoubleBarChartByCountryGreatest.addValue(entriesAvg.get((String)entriesDifferences.keySet().toArray()[i]), "1912", "Bos. & Herz.");
+					datasetDoubleBarChartByCountryGreatest.addValue(entriesAvgSecond.get((String)entriesDifferences.keySet().toArray()[i]), "2012", "Bos. & Herz.");
+				}
 				else {
 					datasetDoubleBarChartByCountryGreatest.addValue(entriesAvg.get((String)entriesDifferences.keySet().toArray()[i]), "1912", (String)entriesDifferences.keySet().toArray()[i]);
 					datasetDoubleBarChartByCountryGreatest.addValue(entriesAvgSecond.get((String)entriesDifferences.keySet().toArray()[i]), "2012", (String)entriesDifferences.keySet().toArray()[i]);
@@ -715,6 +675,9 @@ public class GraphCharts {
 		charts[8].setNotify(false);
 		/** @see https://stackoverflow.com/a/61398612/13772184 */
 		XYPlot plot = charts[8].getXYPlot();
+		//plot.setShadowGenerator(new DefaultShadowGenerator());
+		//plot.setDomainGridlinesVisible(false);
+		//plot.setRangeGridlinesVisible(false);
 		XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
 		r.setSeriesLinesVisible(1, Boolean.TRUE);
 		r.setSeriesShapesVisible(1, Boolean.FALSE);
@@ -866,7 +829,7 @@ public class GraphCharts {
 					//System.out.println("United States exists.");
 					//System.out.println("Entered first time");
 					iterCounts[3] = iterCounts[3] + 1;
-					r.setSeriesPaint(3, new Color(255, 153, 0));
+					r.setSeriesPaint(3, new Color(255, 120, 0));
 					if((String)View.getCountryTable().getModel().getValueAt(i, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(i, 1)).trim().isEmpty()) {
 						counts[3]++;
 						averages[3] = averages[3] + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1));
