@@ -379,17 +379,22 @@ public class GraphCharts {
 		new SwingWorker<Map<String, Double>, Void>() {
 			@Override
 			protected Map<String, Double> doInBackground() {
-				Map<String, Double> entriesAvg = new LinkedHashMap<>();
-				double average = 0;
-				int count = 0;
-				Set<String> set = new LinkedHashSet<>();
+				//Map<String, Double> entriesAvg = new LinkedHashMap<>();
+				Map<String, List<Double>> entries = new LinkedHashMap<>();
+				//double average = 0;
+				//int count = 0;
+				//Set<String> set = new LinkedHashSet<>();
 				
+				/*
 				for(int i = 0; i < View.getCountryTable().getModel().getRowCount(); i++) {
 				    String obj = (String)View.getCountryTable().getModel().getValueAt(i, 3);
 				    if(!set.add(obj)) {
 				        continue;
 				    }
 				}
+				//System.out.println(set.size());
+				*/
+				/*// Iterates over whole data 243 times
 				for(Iterator<String> i = set.iterator(); i.hasNext(); ) {
 					String country = i.next();
 					for(int j = 0; j < View.getCountryTable().getModel().getRowCount(); j++) {
@@ -405,25 +410,52 @@ public class GraphCharts {
 					average = 0;
 					count = 0;
 				}
-				/** Show GUI */
-				try {
-					SwingUtilities.invokeAndWait(() -> {
-						Main.getPB().setValue(100);
-						Main.getSplash().dispose();
-						View.getFrame().setVisible(true);
-					});
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				*/
+				// Iterates over whole data 1 time
+				/** Currently only sum of all values for each country, i.e. not averages */
+				for(int i = 0; i < View.getCountryTable().getModel().getRowCount(); i++) {
+					if((String)View.getCountryTable().getModel().getValueAt(i, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(i, 1)).trim().isEmpty()) {
+						/** Check if the Country already exists to avoid <code>NullPointerException</code> */
+						if(entries.containsKey((String)View.getCountryTable().getModel().getValueAt(i, 3))) {
+							List<Double> list = entries.get((String)View.getCountryTable().getModel().getValueAt(i, 3));
+							list.set(0, list.get(0) + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1)));
+							list.set(1, list.get(1) + 1.0);
+							entries.put((String)View.getCountryTable().getModel().getValueAt(i, 3), list);
+						}
+						else {
+							List<Double> list = new ArrayList<>();
+							list.add(0, Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1)));
+							list.add(1, 1.0);
+							entries.put((String)View.getCountryTable().getModel().getValueAt(i, 3), list);
+						}
+					}
 				}
-				final Map<String, Double> entriesAvgSorted = sortByValueDescending(entriesAvg);
+				//System.out.println(entries.size());
+				/** Calculate averages and place into <code>HashMap</code> */
+				Map<String, Double> mapAvg = new HashMap<>();
+				for(int i = 0; i < entries.size(); i++) {
+					String country = (String)entries.keySet().toArray()[i];
+					//System.out.println(country);
+					//System.out.println((entries.get(country).get(0))/(entries.get(country).get(1)));
+					/** Check if the Country is in the <code>List</> to avoid <code>NullPointerException</code> */
+					if(entries.containsKey(country)) {
+						// Some extra checks
+						if((entries.get(country).get(0))/(entries.get(country).get(1)) < 100) {
+							mapAvg.put(country, (entries.get(country).get(0)/entries.get(country).get(1)));
+						}
+					}
+				}
+				//System.out.println(mapAvg);
+				final Map<String, Double> entriesAvgSorted = sortByValueDescending(mapAvg);
+				//System.out.println(entriesAvgSorted);
 				return entriesAvgSorted;
 			}
 			@Override
 			protected void done() {
 				for(int i = 0; i < 10; i++) { // for sortByValueDescending()
+					//System.out.println("Reached loop.");
 					try {
+						//System.out.println((get().get((String)get().keySet().toArray()[i])));
 						if((get().get((String)get().keySet().toArray()[i])) < 100) { // Antarctica returns infinity because starts from 1950
 							if(((String)get().keySet().toArray()[i]).equals("United Arab Emirates")) {
 								datasetBasicBarChartByCountry.addValue(get().get((String)get().keySet().toArray()[i]), "Average temperature", "UAE");
@@ -457,7 +489,7 @@ public class GraphCharts {
 				});
 				timer.start();
 				*/
-				Main.getPB().setValue(Main.getPB().getValue() + 30);
+				//Main.getPB().setValue(Main.getPB().getValue() + 30);
 				charts[5].setNotify(true);
 			}
 		}.execute();
@@ -665,6 +697,9 @@ public class GraphCharts {
 			Main.getPB().setValue(Main.getPB().getValue() + 30);
 			charts[6].setNotify(true);
 			charts[7].setNotify(true);
+			Main.getPB().setValue(100);
+			Main.getSplash().dispose();
+			View.getFrame().setVisible(true);
 		});
 	}
 	
@@ -852,7 +887,7 @@ public class GraphCharts {
 						averages[4] = averages[4] + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1));
 					}
 					if(iterCounts[4] == 12) {
-						averages[4] =averages[4]/counts[4];
+						averages[4] = averages[4]/counts[4];
 						series[4].add(Double.parseDouble(((String)View.getCountryTable().getModel().getValueAt(i, 0)).substring(0, 4)), averages[4]);
 						averages[4] = 0;
 						counts[4] = 0;
