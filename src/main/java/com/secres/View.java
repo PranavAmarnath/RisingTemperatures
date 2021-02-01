@@ -32,11 +32,18 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 
 /**
+ * <code>View</code> creates and initializes the <i>whole</i> GUI of the Main application.<br>
+ * The GUI uses standard Swing components with nested {@link JPanel}s.
+ * 
+ * The main layout used is {@link CardLayout} for an MDI with easy visualization.
+ * <P>
+ * There are two {@link JTable}s each with their own dataset. {@link GraphCharts} reads from the tables for the visualization.
+ * <P>
+ * All of <code>View</code>'s components are accessed on the EDT per Swing's threading rules.
  * 
  * @author Pranav Amarnath
  *
  */
-
 public class View {
 
 	private static JFrame frame;
@@ -552,17 +559,14 @@ public class View {
 	}
 	
 	/**
-	 * @see https://stackoverflow.com/a/13605411
-	 * 
 	 * Converts a given Image into a BufferedImage
 	 *
+	 * @see https://stackoverflow.com/a/13605411
 	 * @param img The Image to be converted
 	 * @return The converted BufferedImage
 	 */
-	public static BufferedImage toBufferedImage(Image img)
-	{
-	    if (img instanceof BufferedImage)
-	    {
+	public static BufferedImage toBufferedImage(Image img) {
+	    if (img instanceof BufferedImage) {
 	        return (BufferedImage) img;
 	    }
 

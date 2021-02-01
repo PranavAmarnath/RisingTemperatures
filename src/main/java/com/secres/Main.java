@@ -16,20 +16,30 @@ import org.jfree.chart.JFreeChart;
 import com.formdev.flatlaf.*;
 
 /**
+ * <code>Main</code> is the main class for the application.
+ * <P>
+ * This class serves as the Controller, first initializing the splash screen and then notifying
+ * {@link GraphCharts} to update the <code>ChartPanel</code> of each <code>JFreeChart</code>.
+ * <P>
+ * The code also sets {@link System} and {@link UIManager} properties.<br>
+ * As the Controller class, <code>Main</code> creates the {@link Model}s and {@link View}
  * 
  * @author Pranav Amarnath
  *
  */
-
 public class Main {
 
+	/** Table names */
 	static Model modelGlobal, modelCountry;
 	//private static View view;
+	/** Splash screen */
 	private static JWindow splash;
+	/** Progress bar in Splash screen */
 	private static JProgressBar pb;
 	/** Time for read/splash */
-	private int seconds = 20;
+	private int seconds = 3;
 	
+	/** Default Constructor - reads images, creates {@link Model}s */
 	public Main() {
 		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
 		URL imageResource = Main.class.getResource("/gear.png"); // URL: https://cdn.pixabay.com/photo/2012/05/04/10/57/gear-47203_1280.png
@@ -66,6 +76,7 @@ public class Main {
 		*/
 	}
 	
+	/** Initializes the splash screen with necessary Swing components */
 	private void initSplash() {
 		ImageIcon icon = null;
 		icon = new ImageIcon(Main.class.getResource("/splashDotsPNG.png")); // URL: https://cdn.pixabay.com/photo/2017/07/01/19/48/background-2462431_1280.jpg
@@ -105,10 +116,16 @@ public class Main {
 		splash.setVisible(true);
 	}
 	
+	/**
+	 * Notifier method that last {@link Model} has started read.
+	 */
 	static void verifyStartRead() {
 		createView();
 	}
 	
+	/**
+	 * Called inside <code>Main</code> to create {@link View}
+	 */
 	private static void createView() {
 		//splash.dispose();
 		SwingUtilities.invokeLater(() -> {
@@ -116,6 +133,9 @@ public class Main {
 		});
 	}
 	
+	/**
+	 * Notifier method that last {@link Model} has finished read.
+	 */
 	static void verifyReadFinished() {
 		/*// Placing Column 23 data into an ArrayList while avoiding empty data
 		Thread thread = new Thread(new Runnable() {
@@ -142,39 +162,34 @@ public class Main {
 			GraphCharts.updateDataBasicChartByYear();
 		});
 		*/
-		/** Start placing data into graphs; quick reads */
+		/** Start placing data into graphs; all done on EDT. (Quick reads) */
 		GraphCharts.updateDataBasicLineChart();
 		GraphCharts.updateDataBasicChartByYear();
 		GraphCharts.updateScatterPlotCoolingDec();
 		GraphCharts.updateScatterPlotCoolingJun();
 		GraphCharts.updateBasicBarChartByCountry();
-		/** For longer reads, using SwingWorker */
-		new SwingWorker<Void, Void>() {
-			@Override
-			protected Void doInBackground() throws Exception {
-				GraphCharts.updateDoubleBarChartByCountry();
-				GraphCharts.updateMultiXYLineChartByEconomy();
-				return null;
-			}
-			/*
-			@Override
-			protected void done() {
-				getPB().setValue(100);
-				getSplash().dispose();
-				View.getFrame().setVisible(true);
-			}
-			*/
-		}.execute();
+		GraphCharts.updateDoubleBarChartByCountry();
+		GraphCharts.updateMultiXYLineChartByEconomy();
  	}
 	
+	/**
+	 * @return {@link JWindow} splash screen
+	 */
 	static JWindow getSplash() {
 		return splash;
 	}
 	
+	/**
+	 * @return {@link JProgressBar} splash screen.
+	 */
 	static JProgressBar getPB() {
 		return pb;
 	}
 	
+	/**
+	 * Main method of GUI.
+	 * @param args  not used
+	 */
 	public static void main(String[] args) {
 		/** For picky mac users */
 		System.setProperty("apple.laf.useScreenMenuBar", "true");

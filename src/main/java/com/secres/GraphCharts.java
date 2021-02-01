@@ -55,11 +55,16 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 /**
+ * A Utility class  (i.e. a class that is not meant to have instances)<br>
+ * <P>
+ * <code>GraphCharts</code> contains static methods for:<br>
+ * 1. Creating the View of a <code>JFreeChart</code><br>
+ * 2. Creating the Model of the data for that <code>JFreeChart</code><br>
+ * 3. Handling all other visualization from the <code>JFreeChart</code>
  * 
  * @author Pranav Amarnath
  *
  */
-
 public class GraphCharts {
 
 	//private static DefaultCategoryDataset datasetBasicLineChart, datasetBasicLineChartByYear;
@@ -70,10 +75,6 @@ public class GraphCharts {
 	//private static JFreeChart linePlot; // specific for multi line plot by economy
 	static JFreeChart[] charts = new JFreeChart[10];
 	//static int timerIndex = 0;
-	/**
-	 * @see https://www.jfree.org/forum/viewtopic.php?p=36292#p36292
-	 * @see https://stackoverflow.com/a/12074860/13772184
-	 */
 	
 	static ChartPanel basicLineChart() {
 		datasetBasicLineChart = new TimeSeriesCollection();
@@ -577,28 +578,22 @@ public class GraphCharts {
 		return chartPanel;
 	}
 	
-	/**
-	 * Done in background thread.
-	 */
 	static void updateDoubleBarChartByCountry() {
 		//List<Double> entriesList = new ArrayList<>();
-		double average = 0;
-		int count = 0;
-		double averageSecond = 0;
-		int countSecond = 0;
-		Map<String, Double> entriesAvg = new LinkedHashMap<>();
-		Map<String, Double> entriesAvgSecond = new LinkedHashMap<>();
+		//double average = 0;
+		//int count = 0;
+		//double averageSecond = 0;
+		//int countSecond = 0;
+		Map<String, List<Double>> entriesAvg = new LinkedHashMap<>();
+		Map<String, List<Double>> entriesAvgSecond = new LinkedHashMap<>();
+		Map<String, Double> entriesAvgSorted = new LinkedHashMap<>();
+		Map<String, Double> entriesAvgSecondSorted = new LinkedHashMap<>();
 		Map<String, Double> entriesDifferences = new LinkedHashMap<>();
 		Map<String, Double> entriesAvgLeast = new LinkedHashMap<>();
 		Map<String, Double> entriesAvgSecondLeast = new LinkedHashMap<>();
 		Map<String, Double> entriesDifferencesLeast = new LinkedHashMap<>();
 		
-		/*// dummy data
-		datasetDoubleBarChartByCountry.addValue(10, "USA", "2005");
-		datasetDoubleBarChartByCountry.addValue(15, "India", "2005");
-		datasetDoubleBarChartByCountry.addValue(20, "China", "2005");
-		*/
-		
+		/*
 		Set<String> set = new LinkedHashSet<>();
 		for(int i = 0; i < View.getCountryTable().getModel().getRowCount(); i++){
 		    String obj = (String)View.getCountryTable().getModel().getValueAt(i, 3);
@@ -629,13 +624,6 @@ public class GraphCharts {
 				}
 			}
 			//System.out.println(count);
-			/*
-			for(int k = 0; k < count; k++) {
-				if((String)View.getCountryTable().getModel().getValueAt(k, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(k, 1)).trim().isEmpty()) {
-					average = average + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(k, 1));
-				}
-			}
-			*/
 			//System.out.println(average);
 			average = average/count;
 			averageSecond = averageSecond/count;
@@ -649,48 +637,114 @@ public class GraphCharts {
 			averageSecond = 0;
 			countSecond = 0;
 		}
+		*/
+		
+		for(int i = 0; i < View.getCountryTable().getModel().getRowCount(); i++) {
+			if((String)View.getCountryTable().getModel().getValueAt(i, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(i, 1)).trim().isEmpty()) {
+				if((((String)View.getCountryTable().getModel().getValueAt(i, 0)).substring(0, 4)).equals("1912")) {
+					if(entriesAvg.containsKey((String)View.getCountryTable().getModel().getValueAt(i, 3))) {
+						List<Double> list = entriesAvg.get((String)View.getCountryTable().getModel().getValueAt(i, 3));
+						list.set(0, list.get(0) + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1)));
+						list.set(1, list.get(1) + 1.0);
+						entriesAvg.put((String)View.getCountryTable().getModel().getValueAt(i, 3), list);
+					}
+					else {
+						List<Double> list = new ArrayList<>();
+						list.add(0, Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1)));
+						list.add(1, 1.0);
+						entriesAvg.put((String)View.getCountryTable().getModel().getValueAt(i, 3), list);
+					}
+				}
+				else if((((String)View.getCountryTable().getModel().getValueAt(i, 0)).substring(0, 4)).equals("2012")) {
+					if(entriesAvgSecond.containsKey((String)View.getCountryTable().getModel().getValueAt(i, 3))) {
+						List<Double> list = entriesAvgSecond.get((String)View.getCountryTable().getModel().getValueAt(i, 3));
+						list.set(0, list.get(0) + Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1)));
+						list.set(1, list.get(1) + 1.0);
+						entriesAvgSecond.put((String)View.getCountryTable().getModel().getValueAt(i, 3), list);
+					}
+					else {
+						List<Double> list = new ArrayList<>();
+						list.add(0, Double.parseDouble((String)View.getCountryTable().getModel().getValueAt(i, 1)));
+						list.add(1, 1.0);
+						entriesAvgSecond.put((String)View.getCountryTable().getModel().getValueAt(i, 3), list);
+					}
+				}
+			}
+		}
+		//System.out.println(entriesAvg);
+		//System.out.println(entriesAvgSecond);
+		
+		/** Calculate averages and place into <code>HashMap</code> */
+		Map<String, Double> mapAvg = new HashMap<>();
 		for(int i = 0; i < entriesAvg.size(); i++) {
-			if((entriesAvgSecond.get((String)entriesAvgSecond.keySet().toArray()[i])) < 100) {
-				entriesDifferences.put((String)entriesAvgSecond.keySet().toArray()[i], entriesAvgSecond.get((String)entriesAvgSecond.keySet().toArray()[i]) - entriesAvg.get((String)entriesAvg.keySet().toArray()[i]));
+			String country = (String)entriesAvg.keySet().toArray()[i];
+			//System.out.println(country);
+			//System.out.println((entries.get(country).get(0))/(entries.get(country).get(1)));
+			/** Check if the Country is in the <code>List</> to avoid <code>NullPointerException</code> */
+			if(entriesAvg.containsKey(country)) {
+				// Some extra checks
+				if((entriesAvg.get(country).get(0))/(entriesAvg.get(country).get(1)) < 100) {
+					mapAvg.put(country, (entriesAvg.get(country).get(0))/(entriesAvg.get(country).get(1)));
+				}
+			}
+		}
+		
+		/** Repeat for 2012 */
+		Map<String, Double> mapAvgSecond = new HashMap<>();
+		for(int i = 0; i < entriesAvgSecond.size(); i++) {
+			String country = (String)entriesAvgSecond.keySet().toArray()[i];
+			//System.out.println(country);
+			//System.out.println((entries.get(country).get(0))/(entries.get(country).get(1)));
+			/** Check if the Country is in the <code>List</> to avoid <code>NullPointerException</code> */
+			if(entriesAvgSecond.containsKey(country)) {
+				// Some extra checks
+				if((entriesAvgSecond.get(country).get(0))/(entriesAvgSecond.get(country).get(1)) < 100) {
+					mapAvgSecond.put(country, (entriesAvgSecond.get(country).get(0))/(entriesAvgSecond.get(country).get(1)));
+				}
+			}
+		}
+		
+		/** Subtract to get change in temperature */
+		for(int i = 0; i < mapAvg.size(); i++) {
+			if((mapAvg.get((String)mapAvg.keySet().toArray()[i])) < 100) {
+				entriesDifferences.put((String)mapAvg.keySet().toArray()[i], mapAvgSecond.get((String)mapAvg.keySet().toArray()[i]) - mapAvg.get((String)mapAvg.keySet().toArray()[i]));
 			}
 		}
 		entriesDifferencesLeast = entriesDifferences;
-		entriesAvgLeast = entriesAvg;
-		entriesAvgSecondLeast = entriesAvgSecond;
+		entriesAvgLeast = mapAvg;
+		entriesAvgSecondLeast = mapAvgSecond;
 		
+		entriesAvgSorted = sortByValueDescending(mapAvg);
+		entriesAvgSecondSorted = sortByValueDescending(mapAvgSecond);
 		entriesDifferences = sortByValueDescending(entriesDifferences);
-		entriesAvg = sortByValueDescending(entriesAvg);
-		entriesAvgSecond = sortByValueDescending(entriesAvgSecond);
 		
-		entriesDifferencesLeast = sortByValue(entriesDifferencesLeast);
 		entriesAvgLeast = sortByValue(entriesAvgLeast);
 		entriesAvgSecondLeast = sortByValue(entriesAvgSecondLeast);
+		entriesDifferencesLeast = sortByValue(entriesDifferencesLeast);
 		
-		for(int i = 0; i < 19; i++) {
-			if((entriesAvgSecond.get((String)entriesAvgSecond.keySet().toArray()[i])) < 100) {
-				if(((String)entriesDifferences.keySet().toArray()[i]).equals("Canada")) {
-					continue;
-				}
-				else if(((String)entriesDifferences.keySet().toArray()[i]).equals("Bosnia And Herzegovina")) {
-					datasetDoubleBarChartByCountryGreatest.addValue(entriesAvg.get((String)entriesDifferences.keySet().toArray()[i]), "1912", "Bos. & Herz.");
-					datasetDoubleBarChartByCountryGreatest.addValue(entriesAvgSecond.get((String)entriesDifferences.keySet().toArray()[i]), "2012", "Bos. & Herz.");
-				}
-				else {
-					datasetDoubleBarChartByCountryGreatest.addValue(entriesAvg.get((String)entriesDifferences.keySet().toArray()[i]), "1912", (String)entriesDifferences.keySet().toArray()[i]);
-					datasetDoubleBarChartByCountryGreatest.addValue(entriesAvgSecond.get((String)entriesDifferences.keySet().toArray()[i]), "2012", (String)entriesDifferences.keySet().toArray()[i]);
-				}
+		//System.out.println(entriesAvgSorted);
+		//System.out.println(entriesAvgSecondSorted);
+		//System.out.println(entriesDifferences);
+		//System.out.println(entriesDifferencesLeast);
+		
+		for(int i = 0; i < 10; i++) {
+			if(((String)entriesDifferences.keySet().toArray()[i]).equals("Bosnia And Herzegovina")) {
+				datasetDoubleBarChartByCountryGreatest.addValue(entriesAvgSorted.get((String)entriesDifferences.keySet().toArray()[i]), "1912", "Bos. & Herz.");
+				datasetDoubleBarChartByCountryGreatest.addValue(entriesAvgSecondSorted.get((String)entriesDifferences.keySet().toArray()[i]), "2012", "Bos. & Herz.");
+			}
+			else {
+				datasetDoubleBarChartByCountryGreatest.addValue(entriesAvgSorted.get((String)entriesDifferences.keySet().toArray()[i]), "1912", (String)entriesDifferences.keySet().toArray()[i]);
+				datasetDoubleBarChartByCountryGreatest.addValue(entriesAvgSecondSorted.get((String)entriesDifferences.keySet().toArray()[i]), "2012", (String)entriesDifferences.keySet().toArray()[i]);
 			}
 		}
-		for(int i = 0; i < 15; i++) {
-			if((entriesAvgSecondLeast.get((String)entriesAvgSecondLeast.keySet().toArray()[i])) < 100) {
-				if(((String)entriesDifferencesLeast.keySet().toArray()[i]).equals("Congo (Democratic Republic Of The)")) {
-					datasetDoubleBarChartByCountryLeast.addValue(entriesAvgLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "1912", "D.R. Congo");
-					datasetDoubleBarChartByCountryLeast.addValue(entriesAvgSecondLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "2012", "D.R. Congo");
-				}
-				else {
-					datasetDoubleBarChartByCountryLeast.addValue(entriesAvgLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "1912", (String)entriesDifferencesLeast.keySet().toArray()[i]);
-					datasetDoubleBarChartByCountryLeast.addValue(entriesAvgSecondLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "2012", (String)entriesDifferencesLeast.keySet().toArray()[i]);
-				}
+		for(int i = 0; i < 10; i++) {
+			if(((String)entriesDifferencesLeast.keySet().toArray()[i]).equals("Congo (Democratic Republic Of The)")) {
+				datasetDoubleBarChartByCountryLeast.addValue(entriesAvgLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "1912", "D.R. Congo");
+				datasetDoubleBarChartByCountryLeast.addValue(entriesAvgSecondLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "2012", "D.R. Congo");
+			}
+			else {
+				datasetDoubleBarChartByCountryLeast.addValue(entriesAvgLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "1912", (String)entriesDifferencesLeast.keySet().toArray()[i]);
+				datasetDoubleBarChartByCountryLeast.addValue(entriesAvgSecondLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "2012", (String)entriesDifferencesLeast.keySet().toArray()[i]);
 			}
 		}
 		SwingUtilities.invokeLater(() -> {
@@ -775,9 +829,6 @@ public class GraphCharts {
 		return chartPanel;
 	}
 	
-	/**
-	 * Done in background thread.
-	 */
 	static void updateMultiXYLineChartByEconomy() {
 		XYPlot plot = charts[8].getXYPlot();
 		XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
