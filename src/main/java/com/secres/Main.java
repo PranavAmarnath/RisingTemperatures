@@ -56,24 +56,6 @@ public class Main {
 		
 		modelGlobal = new Model("/GlobalTemperatures.csv");
 		modelCountry = new Model("/GlobalLandTemperaturesByCountry.csv");
-		/**
-		 * For fixed splash time (5 seconds) irrespective of finished parsing through data -> ..
-		 * ..will not work always if model is not done by the time the worker ends, this depends on the data..
-		 * ..comment if using dynamic option
-		 */
-		/*
-		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-			protected Void doInBackground() throws Exception {
-				Thread.sleep(5000);
-				return null;
-			}
-			protected void done() {
-				splash.dispose();
-				view.getFrame().setVisible(true);
-			}
-		};
-		worker.execute();
-		*/
 	}
 	
 	/** Initializes the splash screen with necessary Swing components */
@@ -91,7 +73,7 @@ public class Main {
 		
 		JLabel estTime = new JLabel("Est. Time Remaining: " + seconds + " seconds...");
 		timePanel.add(estTime);
-		timePanel.setBackground(new Color(134, 169, 181));
+		timePanel.setBackground(new Color(134, 169, 181)); // color of image "splashDotsPNG.png"
 		Timer estTimer = new Timer(1000, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -105,7 +87,7 @@ public class Main {
 		estTimer.start();
 		
 		pb = new JProgressBar(JProgressBar.HORIZONTAL);
-		//pb.setIndeterminate(true);
+		pb.setIndeterminate(true);
 		splashPanel.add(pb, BorderLayout.SOUTH);
 		
 		splash.setContentPane(splashPanel);
@@ -116,16 +98,12 @@ public class Main {
 		splash.setVisible(true);
 	}
 	
-	/**
-	 * Notifier method that last {@link Model} has started read.
-	 */
+	/** Notifier method that last {@link Model} has started read. */
 	static void verifyStartRead() {
 		createView();
 	}
 	
-	/**
-	 * Called inside <code>Main</code> to create {@link View}
-	 */
+	/** Called inside <code>Main</code> to create {@link View} */
 	private static void createView() {
 		//splash.dispose();
 		SwingUtilities.invokeLater(() -> {
@@ -133,36 +111,9 @@ public class Main {
 		});
 	}
 	
-	/**
-	 * Notifier method that last {@link Model} has finished read.
-	 */
+	/** Notifier method that last {@link Model} has finished read. */
 	static void verifyReadFinished() {
-		/*// Placing Column 23 data into an ArrayList while avoiding empty data
-		Thread thread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				ArrayList<Object> list = new ArrayList<>();
-				//System.out.println(View.getTable().getModel().getRowCount());
-				for(int i = 0; i < View.getTable().getModel().getRowCount(); i++) {
-					//System.out.println(((String)View.getTable().getModel().getValueAt(i, 23)).length());
-					if(!(((String)View.getTable().getModel().getValueAt(i, 23)).equals(""))) {
-						list.add(View.getTable().getModel().getValueAt(i, 23)); // get the all row values at column index 23
-					}
-				}
-				//list.forEach(System.out::println);
-			}
-		});
-		thread.start();
-		*/
-		/*
-		SwingUtilities.invokeLater(() -> {
-			GraphCharts.updateDataBasicLineChart();
-			//GraphCharts.updateDataBasicLineChartByYear();
-			//GraphCharts.updateBasicScatterPlotByYear();
-			GraphCharts.updateDataBasicChartByYear();
-		});
-		*/
-		/** Start placing data into graphs; all done on EDT. (Quick reads) */
+		// Start placing data into graphs; all done on EDT. (Quick reads)
 		GraphCharts.updateDataBasicLineChart();
 		GraphCharts.updateDataBasicChartByYear();
 		GraphCharts.updateScatterPlotCoolingDec();
@@ -170,9 +121,13 @@ public class Main {
 		GraphCharts.updateBasicBarChartByCountry();
 		GraphCharts.updateDoubleBarChartByCountry();
 		GraphCharts.updateMultiXYLineChartByEconomy();
+		
+		Main.getSplash().dispose();
+		View.getFrame().setVisible(true);
  	}
 	
 	/**
+	 * Returns splash screen
 	 * @return {@link JWindow} splash screen
 	 */
 	static JWindow getSplash() {
@@ -180,7 +135,8 @@ public class Main {
 	}
 	
 	/**
-	 * @return {@link JProgressBar} splash screen.
+	 * Returns progress bar of splash screen
+	 * @return {@link JProgressBar} splash screen
 	 */
 	static JProgressBar getPB() {
 		return pb;
@@ -191,11 +147,11 @@ public class Main {
 	 * @param args  not used
 	 */
 	public static void main(String[] args) {
-		/** For picky mac users */
+		// For picky mac users
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
-		/** Mac header on mac menubar */
+		// Mac header on mac menubar
 		System.setProperty("apple.awt.application.name", "Secres");
-		/** Acceleration of graphics, should ONLY be used by developers */
+		// Acceleration of graphics, should ONLY be used by developers
 		//System.setProperty("apple.awt.graphics.EnableQ2DX","true");
 		System.setProperty("apple.awt.antialiasing", "true");
 		System.setProperty("apple.awt.textantialiasing", "true");

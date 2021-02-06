@@ -28,20 +28,30 @@ import org.jfree.chart.JFreeChart;
  */
 public class Model {
 
+	/** Table model */
 	private DefaultTableModel model;
+	/** Table header */
 	private Object[] header;
 	//private List<String[]> myEntries = new ArrayList<>();
+	/** OpenCSV parser */
 	private CSVReader reader;
+	/** Current line */
 	private String[] line;
+	/** Last dataset */
 	private final String LASTDATASET = "/GlobalLandTemperaturesByCountry.csv";
 	
+	/**
+	 * Model constructor
+	 * @param path  Path to file
+	 */
 	public Model(String path) {
 		new SwingWorker<Void, Object[]>() {
 			protected Void doInBackground() {
 				reader = new CSVReader(new InputStreamReader(getClass().getResourceAsStream(path)));
 				try {
 					header = (String[]) reader.readNext();
-					SwingUtilities.invokeAndWait(() -> model = new DefaultTableModel(header, 0)); // NOT invokeLater() because model HAS to be initialized immediately on EDT
+					//SwingUtilities.invokeAndWait(() -> model = new DefaultTableModel(header, 0)); // NOT invokeLater() because model HAS to be initialized immediately on EDT
+					model = new DefaultTableModel(header, 0);
 					if(path.equals(LASTDATASET)) { // Start read on final dataset so that there's only one View instance
 						Main.verifyStartRead();
 					}
@@ -55,7 +65,7 @@ public class Model {
 			}
 			protected void done() {
 				try {
-					Main.getPB().setValue(Main.getPB().getValue() + 15);
+					//Main.getPB().setValue(Main.getPB().getValue() + 15);
 					reader.close();
 					if(path.equals(LASTDATASET)) { // final dataset
 						Main.verifyReadFinished();
@@ -67,10 +77,18 @@ public class Model {
 		}.execute();
 	}
 	
+	/**
+	 * Returns table model
+	 * @return <code>DefaultTableModel</code> - table model
+	 */
 	public DefaultTableModel getModel() {
 		return model;
 	}
 	
+	/**
+	 * Returns table header
+	 * @return <code>Object[]</code> - header
+	 */
 	public Object[] getHeaders() {
 		return header;
 	}

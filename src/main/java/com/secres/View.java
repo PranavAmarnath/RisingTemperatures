@@ -46,13 +46,20 @@ import com.formdev.flatlaf.FlatLightLaf;
  */
 public class View {
 
+	/** Main frame */
 	private static JFrame frame;
 	
+	/** Main panel */
 	private JPanel mainPanel;
+	/** Tree panel */
 	private JPanel treePanel;
+	/** Graph panel */
 	private JPanel graphPanel;
+	/** Panel with Cards - CardLayout */
 	private JPanel cardsPanel;
+	/** Filler panel with no node selected. */
 	private JPanel emptyPanel;
+	/** Table data */
 	private JPanel tableGlobalPanel, tableCountryPanel;
 	
 	private final String EMPTYPANEL = "Card that is empty";
@@ -79,6 +86,7 @@ public class View {
 	private DefaultMutableTreeNode globalNode, basicLineNode, basicLineByYearNode, basicScatterByYearNode, basicScatterCoolingDecNode, basicScatterCoolingJunNode;
 	private DefaultMutableTreeNode countryNode, basicBarNode, doubleBarGreatestNode, doubleBarLeastNode, multiLineEconomyNode;
 	
+	/** <code>JTable</code> data */
 	private static JTable tableGlobalData, tableCountryData;
 	
 	private JMenuBar menuBar;
@@ -95,64 +103,41 @@ public class View {
 	//private StandardChartTheme themeLight = (StandardChartTheme) StandardChartTheme.createJFreeTheme();
 	//private StandardChartTheme themeDark = (StandardChartTheme) StandardChartTheme.createDarknessTheme();
 	
-	/*
-	private final static String LICENSE = "MIT License\n"
-			+ "\n"
-			+ "Copyright \u00a9 2020-2021 Pranav Amarnath\n"
-			+ "\n"
-			+ "Permission is hereby granted, free of charge, to any person obtaining a copy\n"
-			+ "of this software and associated documentation files (the \"Software\"), to deal\n"
-			+ "in the Software without restriction, including without limitation the rights\n"
-			+ "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n"
-			+ "copies of the Software, and to permit persons to whom the Software is\n"
-			+ "furnished to do so, subject to the following conditions:\n"
-			+ "\n"
-			+ "The above copyright notice and this permission notice shall be included in all\n"
-			+ "copies or substantial portions of the Software.\n"
-			+ "\n"
-			+ "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n"
-			+ "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n"
-			+ "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n"
-			+ "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n"
-			+ "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n"
-			+ "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n"
-			+ "SOFTWARE.\n"
-			+ "";
-	*/
-	
+	/** Default constructor */
 	public View() {
 		createGUI();
 	}
 	
+	/** Creates main GUI. */
 	private void createGUI() {
 		frame = new JFrame("Secres GUI") {
+			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension(800, 600);
 			}
 		};
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(WindowEvent e) {
 				createQuit(frame);
 			}
 		});
 
-		/** @see https://stackoverflow.com/a/56924202/13772184 */
-		/** loading an image from a file */
+		/** Reference: @see https://stackoverflow.com/a/56924202/13772184 */
+		// loading an image from a file
 		Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
 		URL imageResource = View.class.getResource("/gear.png"); // URL: https://cdn.pixabay.com/photo/2012/05/04/10/57/gear-47203_1280.png
 		Image image = defaultToolkit.getImage(imageResource);
 
 		try {
-			/** @since 9 */
 			Taskbar taskbar = Taskbar.getTaskbar();
-			/** set icon for mac os (and other systems which do support this method) */
+			// set icon for mac os (and other systems which do support this method)
 			taskbar.setIconImage(image);
 		} catch (UnsupportedOperationException e) {
-			/** set icon for windows (and other systems which do support this method) */
+			// set icon for windows (and other systems which do support this method)
 			frame.setIconImage(image);
 		}
-		/** end citation */
 
 		menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
@@ -367,6 +352,7 @@ public class View {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, EMPTYPANEL);
 				}
+				treePanel.repaint(); // removes Nimbus Laf paint artifacts
 			}
 		});
 		
@@ -380,7 +366,7 @@ public class View {
 		tableGlobalPanel = new JPanel(new BorderLayout());
 		tableCountryPanel = new JPanel(new BorderLayout());
 		
-		/** @see https://stackoverflow.com/a/5630271/13772184 */
+		/** Reference: @see https://stackoverflow.com/a/5630271/13772184 */
 		/*// Start citation
 		String[] header = {"Name", "Value"};
         String[] a = new String[0];
@@ -491,6 +477,7 @@ public class View {
 		//frame.setVisible(true);
 	}
 	
+	/**	@return The <code>DefaultMutableTreeNode</code> for the <code>JTree</code> */
 	private DefaultMutableTreeNode setTreeModel() {
 		root = new DefaultMutableTreeNode("Access");
 		dataRootNode = new DefaultMutableTreeNode("Data");
@@ -532,18 +519,27 @@ public class View {
         return root;
 	}
 	
+	/** @return The main <code>JFrame</code> */
 	public static JFrame getFrame() {
 		return frame;
 	}
 	
+	/** @return The Global <code>JTable</code> */
 	public static JTable getGlobalTable() {
 		return tableGlobalData;
 	}
 	
+	/** @return The Country <code>JTable</code> */
 	public static JTable getCountryTable() {
 		return tableCountryData;
 	}
 	
+	/**
+	 * Handles {@link Clipboard} mechanism for tables
+	 * 
+	 * @param table  <code>JTable</code> to put copy mechanism
+	 * @param e  <code>MouseEvent</code>
+	 */
 	private void handleCopy(JTable table, MouseEvent e) {
 		if(e.getClickCount() == 2) { /** e.getClickCount() == 2 -> double-click */
             //System.out.println("right click");
@@ -560,12 +556,12 @@ public class View {
 	
 	/**
 	 * Converts a given Image into a BufferedImage
-	 *
-	 * @see https://stackoverflow.com/a/13605411
+	 * 
 	 * @param img The Image to be converted
-	 * @return The converted BufferedImage
+	 * @return The converted <code>BufferedImage</code>
 	 */
 	public static BufferedImage toBufferedImage(Image img) {
+		/** Reference: @see https://stackoverflow.com/a/13605411 */
 	    if (img instanceof BufferedImage) {
 	        return (BufferedImage) img;
 	    }
@@ -582,10 +578,15 @@ public class View {
 	    return bimage;
 	}
 	
+	/** Instantiates About dialog */
 	static void createAbout() {
 		createAbout(null);
 	}
 	
+	/**
+	 * Instantiates About dialog
+	 * @param frame
+	 */
 	static void createAbout(JFrame frame) {
 		/*
 		JTextArea textArea = new JTextArea();
@@ -625,10 +626,15 @@ public class View {
 		JOptionPane.showOptionDialog(frame, mainPanel, "About", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{}, null);
 	}
 	
+	/** Instantiates Preferences dialog */
 	static void createPreferences() {
 		createPreferences(null);
 	}
 	
+	/**
+	 * Instantiates Preferences dialog
+	 * @param frame
+	 */
 	static void createPreferences(JFrame frame) {
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		JPanel prefPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -676,7 +682,7 @@ public class View {
 		JTextPane textPane = new JTextPane();
 		textPane.setEditable(false);
 		
-		/** @see https://stackoverflow.com/a/4059365 */
+		/** Reference: @see https://stackoverflow.com/a/4059365 */
 		StyledDocument doc = textPane.getStyledDocument();
 		
 		SimpleAttributeSet headers = new SimpleAttributeSet();
@@ -717,6 +723,7 @@ public class View {
         JOptionPane.showMessageDialog(frame, mainPanel, "Preferences", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
+	/** Instantiates Quit dialog. */
 	static void createQuit() {
 		int input = JOptionPane.showConfirmDialog(null, "Do you want to quit?", "Quit", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
     	if(input == 0) {
@@ -726,7 +733,10 @@ public class View {
     		frame.setVisible(true);
     	}
 	}
-	
+	/**
+	 * Instantiates Quit dialog.
+	 * @param frame
+	 */
 	static void createQuit(JFrame frame) {
 		int input = JOptionPane.showConfirmDialog(frame, "Do you want to quit?", "Quit", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
     	if(input == 0) {
