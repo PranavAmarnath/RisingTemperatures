@@ -30,7 +30,7 @@ import com.formdev.flatlaf.*;
 public class Main {
 
 	/** Table names */
-	static Model modelGlobal, modelCountry;
+	private static Model modelGlobal, modelCountry;
 	//private static View view;
 	/** Splash screen */
 	private static JWindow splash;
@@ -109,6 +109,16 @@ public class Main {
 		SwingUtilities.invokeLater(() -> {
 			new View();
 		});
+	}
+	
+	/** @return {@link Model} instance for Global data */
+	static Model getGlobalModel() {
+		return modelGlobal;
+	}
+	
+	/** @return {@link Model} instance for Country data */
+	static Model getCountryModel() {
+		return modelCountry;
 	}
 	
 	/** Notifier method that last {@link Model} has finished read. */

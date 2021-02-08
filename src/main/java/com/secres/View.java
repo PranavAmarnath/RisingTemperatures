@@ -352,7 +352,7 @@ public class View {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, EMPTYPANEL);
 				}
-				treePanel.repaint(); // removes Nimbus Laf paint artifacts
+				//treePanel.repaint(); // removes Nimbus Laf paint artifacts
 			}
 		});
 		
@@ -379,31 +379,20 @@ public class View {
         DefaultTableModel model = new DefaultTableModel(data, header);
         // end citation */
 		
-		tableGlobalData = new JTable(Main.modelGlobal.getModel()) {
+		tableGlobalData = new JTable(Main.getGlobalModel().getModel()) {
 			@Override
 			public boolean isCellEditable(int row, int column) {  
 				return false;
 			}
 		};
 		
-		tableCountryData = new JTable(Main.modelCountry.getModel()) {
+		tableCountryData = new JTable(Main.getCountryModel().getModel()) {
 			@Override
 			public boolean isCellEditable(int row, int column) {  
 				return false;
 			}
 		};
 		//System.out.println("Reached second table.");
-		
-		if(System.getProperty("os.name").toString().contains("Mac")) {
-			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		else {
-			FlatLightLaf.install();
-		}
 		
 		///*
 		tableGlobalData.setCellSelectionEnabled(true);
