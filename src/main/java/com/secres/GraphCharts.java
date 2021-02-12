@@ -75,6 +75,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
+import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -208,8 +209,12 @@ public class GraphCharts {
 			}
 		});
 		JPanel checkboxPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		checkboxPanel.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
 		checkboxPanel.add(showUncertainty);
 		checkboxPanel.add(showInterval);
+		checkboxPanel.setBackground(Color.WHITE);
+		showUncertainty.setBackground(Color.WHITE);
+		showInterval.setBackground(Color.WHITE);
 		mainPanel.add(checkboxPanel, BorderLayout.SOUTH);
 
 		return mainPanel;
@@ -447,7 +452,9 @@ public class GraphCharts {
         domainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45); // Rotates axis labels to 45 degrees
         
 		JPanel scrollPanel = new JPanel(new BorderLayout());
+		scroller.putClientProperty("JScrollBar.showButtons", true);
 		scrollPanel.add(scroller);
+		scrollPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 2, 5));
 		scrollPanel.setBackground(Color.WHITE);
 		
 		JPanel mainPanel = new JPanel(new BorderLayout());
@@ -545,10 +552,28 @@ public class GraphCharts {
 	 * Double bar chart organized by greatest difference in temperature from 1912-2012
 	 * @return the <code>ChartPanel</code>
 	 */
-	static ChartPanel doubleBarChartByCountryGreatest() {
+	static JPanel doubleBarChartByCountryGreatest() {
+		final int NUM_COUNTRIES = 240;
+		JScrollBar scroller = new JScrollBar(SwingConstants.VERTICAL, 0, 10, 0, NUM_COUNTRIES);
+		
 		datasetDoubleBarChartByCountryGreatest = new DefaultCategoryDataset();
+		SlidingCategoryDataset dataset = new SlidingCategoryDataset(datasetDoubleBarChartByCountryGreatest, 0, 10);
+		
+		JPanel scrollPanel = new JPanel(new BorderLayout());
+		scroller.putClientProperty("JScrollBar.showButtons", true);
+		scrollPanel.add(scroller);
+		scrollPanel.setBorder(BorderFactory.createEmptyBorder(60, 2, 60, 2));
+		scrollPanel.setBackground(Color.WHITE);
+		
+		JPanel mainPanel = new JPanel(new BorderLayout());
+		mainPanel.add(scrollPanel, BorderLayout.EAST);
+		
+		scroller.getModel().addChangeListener(e -> {
+			dataset.setFirstCategoryIndex(scroller.getValue());
+			scroller.repaint(); // removes scroll bar paint artifacts
+		});
 
-		charts[6] = ChartFactory.createBarChart("Countries with Highest Net Change In Temperature (1912-2012)", "Country", "Average Temperature \u00B0C", datasetDoubleBarChartByCountryGreatest, PlotOrientation.HORIZONTAL, true, true, false);
+		charts[6] = ChartFactory.createBarChart("Countries with Highest Net Change In Temperature (1912-2012)", "Country", "Average Temperature \u00B0C", dataset, PlotOrientation.HORIZONTAL, true, true, false);
 		charts[6].setNotify(false);
 		/** Reference: @see https://stackoverflow.com/a/61398612/13772184 */
 		CategoryPlot plot = charts[6].getCategoryPlot();
@@ -574,18 +599,37 @@ public class GraphCharts {
 
 		chartPanels[6] = new ChartPanel(charts[6]);
 		chartPanels[6].setMouseWheelEnabled(true);
+		mainPanel.add(chartPanels[6]);
 
-		return chartPanels[6];
+		return mainPanel;
 	}
 	
 	/**
 	 * Double bar chart organized by least difference in temperature from 1912-2012
 	 * @return the <code>ChartPanel</code>
 	 */
-	static ChartPanel doubleBarChartByCountryLeast() {
+	static JPanel doubleBarChartByCountryLeast() {
+		final int NUM_COUNTRIES = 240;
+		JScrollBar scroller = new JScrollBar(SwingConstants.VERTICAL, 0, 10, 0, NUM_COUNTRIES);
+		
 		datasetDoubleBarChartByCountryLeast = new DefaultCategoryDataset();
+		SlidingCategoryDataset dataset = new SlidingCategoryDataset(datasetDoubleBarChartByCountryLeast, 0, 10);
+		
+		JPanel scrollPanel = new JPanel(new BorderLayout());
+		scroller.putClientProperty("JScrollBar.showButtons", true);
+		scrollPanel.add(scroller);
+		scrollPanel.setBorder(BorderFactory.createEmptyBorder(60, 2, 60, 2));
+		scrollPanel.setBackground(Color.WHITE);
+		
+		JPanel mainPanel = new JPanel(new BorderLayout());
+		mainPanel.add(scrollPanel, BorderLayout.EAST);
+		
+		scroller.getModel().addChangeListener(e -> {
+			dataset.setFirstCategoryIndex(scroller.getValue());
+			scroller.repaint(); // removes scroll bar paint artifacts
+		});
 
-		charts[7] = ChartFactory.createBarChart("Countries with Least Net Change In Temperature (1912-2012)", "Country", "Average Temperature \u00B0C", datasetDoubleBarChartByCountryLeast, PlotOrientation.HORIZONTAL, true, true, false);
+		charts[7] = ChartFactory.createBarChart("Countries with Least Net Change In Temperature (1912-2012)", "Country", "Average Temperature \u00B0C", dataset, PlotOrientation.HORIZONTAL, true, true, false);
 		charts[7].setNotify(false);
 		/** Reference: @see https://stackoverflow.com/a/61398612/13772184 */
 		CategoryPlot plot = charts[7].getCategoryPlot();
@@ -612,20 +656,23 @@ public class GraphCharts {
 
 		chartPanels[7] = new ChartPanel(charts[7]);
 		chartPanels[7].setMouseWheelEnabled(true);
+		mainPanel.add(chartPanels[7]);
 
-		return chartPanels[7];
+		return mainPanel;
 	}
 	
 	/** Adds data to both of the double bar charts by country organized by difference */
 	static void updateDoubleBarChartByCountry() {
-		Map<String, List<Double>> entriesAvg = new LinkedHashMap<>();
-		Map<String, List<Double>> entriesAvgSecond = new LinkedHashMap<>();
-		Map<String, Double> entriesAvgSorted = new LinkedHashMap<>();
-		Map<String, Double> entriesAvgSecondSorted = new LinkedHashMap<>();
-		Map<String, Double> entriesDifferences = new LinkedHashMap<>();
-		Map<String, Double> entriesAvgLeast = new LinkedHashMap<>();
-		Map<String, Double> entriesAvgSecondLeast = new LinkedHashMap<>();
-		Map<String, Double> entriesDifferencesLeast = new LinkedHashMap<>();
+		final int NUM_COUNTRIES = 240;
+		
+		Map<String, List<Double>> entriesAvg = new LinkedHashMap<>(); // 1912
+		Map<String, List<Double>> entriesAvgSecond = new LinkedHashMap<>(); // 2012
+		Map<String, Double> entriesAvgSorted = new LinkedHashMap<>(); // 1912 sorted by Greatest to Least
+		Map<String, Double> entriesAvgSecondSorted = new LinkedHashMap<>(); // 2012 sorted by Greatest to Least
+		Map<String, Double> entriesDifferences = new LinkedHashMap<>(); // Differences 1912-2012 per country sorted by Greatest to Least
+		Map<String, Double> entriesAvgLeast = new LinkedHashMap<>(); // 1912 sorted by Least to Greatest
+		Map<String, Double> entriesAvgSecondLeast = new LinkedHashMap<>(); // 2012 sorted by Least to Greatest
+		Map<String, Double> entriesDifferencesLeast = new LinkedHashMap<>(); // Differences 1912-2012 per country sorted by Least to Greatest
 		
 		for(int i = 0; i < View.getCountryTable().getModel().getRowCount(); i++) {
 			if((String)View.getCountryTable().getModel().getValueAt(i, 1) != null && !((String)View.getCountryTable().getModel().getValueAt(i, 1)).trim().isEmpty()) {
@@ -704,7 +751,7 @@ public class GraphCharts {
 		entriesAvgSecondLeast = sortByValue(entriesAvgSecondLeast);
 		entriesDifferencesLeast = sortByValue(entriesDifferencesLeast);
 		
-		for(int i = 0; i < 10; i++) {
+		for(int i = 0; i < NUM_COUNTRIES; i++) {
 			if(((String)entriesDifferences.keySet().toArray()[i]).length() > 10) {
 				datasetDoubleBarChartByCountryGreatest.addValue(entriesAvgSorted.get((String)entriesDifferences.keySet().toArray()[i]), "1912", ((String)entriesDifferences.keySet().toArray()[i]).substring(0, 9) + "...");
 				datasetDoubleBarChartByCountryGreatest.addValue(entriesAvgSecondSorted.get((String)entriesDifferences.keySet().toArray()[i]), "2012", ((String)entriesDifferences.keySet().toArray()[i]).substring(0, 9) + "...");
@@ -714,7 +761,7 @@ public class GraphCharts {
 				datasetDoubleBarChartByCountryGreatest.addValue(entriesAvgSecondSorted.get((String)entriesDifferences.keySet().toArray()[i]), "2012", (String)entriesDifferences.keySet().toArray()[i]);
 			}
 		}
-		for(int i = 0; i < 10; i++) {
+		for(int i = 0; i < NUM_COUNTRIES; i++) {
 			if(((String)entriesDifferencesLeast.keySet().toArray()[i]).length() > 10) {
 				datasetDoubleBarChartByCountryLeast.addValue(entriesAvgLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "1912", ((String)entriesDifferencesLeast.keySet().toArray()[i]).substring(0, 9) + "...");
 				datasetDoubleBarChartByCountryLeast.addValue(entriesAvgSecondLeast.get((String)entriesDifferencesLeast.keySet().toArray()[i]), "2012", ((String)entriesDifferencesLeast.keySet().toArray()[i]).substring(0, 9) + "...");
@@ -826,6 +873,9 @@ public class GraphCharts {
         });
         JPanel crosshairCheckboxPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         crosshairCheckboxPanel.add(enableCrosshair);
+        crosshairCheckboxPanel.setBackground(Color.WHITE);
+        enableCrosshair.setBackground(Color.WHITE);
+        crosshairCheckboxPanel.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
         
         mainPanel.add(chartPanels[8]);
         mainPanel.add(crosshairCheckboxPanel, BorderLayout.SOUTH);

@@ -93,7 +93,7 @@ public class View {
 	private JMenu file, view;
 	private ButtonGroup viewGroup;
 	private JMenuItem about, preferences, close;
-	private JMenuItem light, dark;
+	private JMenuItem light;
 	private static JMenuItem nimbus;
 	private static boolean nimbusEnabled = false;
 	private JMenuItem system;
@@ -165,25 +165,6 @@ public class View {
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
-		dark = new JRadioButtonMenuItem("Dark");
-		dark.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					UIManager.setLookAndFeel(darkLaf);
-				} catch (UnsupportedLookAndFeelException e1) {
-					e1.printStackTrace();
-				}
-				/*// causes series paint to go back to default
-				SwingUtilities.updateComponentTreeUI(frame);
-				for(int i = 0; i < GraphCharts.charts.length; i++) {
-					try {
-						themeDark.apply(GraphCharts.charts[i]);
-					} catch(Exception e1) { }
-				}
-				*/
-				SwingUtilities.updateComponentTreeUI(frame);
-			}
-		});
 		nimbus = new JRadioButtonMenuItem("Nimbus");
 		nimbus.addActionListener(new ActionListener() {
 			@Override
@@ -213,7 +194,6 @@ public class View {
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
-		nimbus.setEnabled(false);
 		system = new JRadioButtonMenuItem(System.getProperty("os.name").toString());
 		system.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -239,14 +219,12 @@ public class View {
 			}
 		});
 		view.add(light);
-		view.add(dark);
 		view.addSeparator();
 		view.add(nimbus);
 		view.add(system);
 		viewGroup = new ButtonGroup();
 		viewGroup.add(light);
 		light.setSelected(true);
-		viewGroup.add(dark);
 		viewGroup.add(nimbus);
 		viewGroup.add(system);
 		
@@ -626,30 +604,10 @@ public class View {
 	 */
 	static void createPreferences(JFrame frame) {
 		JPanel mainPanel = new JPanel(new BorderLayout());
-		JPanel prefPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JPanel northPanel = new JPanel();
-		northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.Y_AXIS));
-		JCheckBox enableNimbus = new JCheckBox("Nimbus Theme (Warning)");
-		enableNimbus.setSelected(nimbusEnabled);
-		enableNimbus.setToolTipText("Enable Nimbus Theme");
-		enableNimbus.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if(nimbusEnabled) {
-					nimbus.setEnabled(false);
-					nimbusEnabled = false;
-				}
-				else {
-					nimbus.setEnabled(true);
-					nimbusEnabled = true;
-				}
-			}
-		});
-		prefPanel.add(enableNimbus);
-		northPanel.add(prefPanel);
+		JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		
 		JButton helpButton = new JButton("Help");
-		helpButton.setToolTipText("Help");
+		helpButton.setToolTipText("Go to home website");
 		helpButton.putClientProperty("JButton.buttonType", "help");
 		JTextArea textArea = new JTextArea();
 		textArea.setEditable(false);
@@ -701,7 +659,6 @@ public class View {
 			//System.out.println(SwingUtilities.isEventDispatchThread());
 			doc.insertString(doc.getLength(), "Drag the mouse up and release (~1 sec.) to exit zoomed state.\n", text);
 			doc.insertString(doc.getLength(), "Hover the mouse over any point/bar etc. to view the value.\n", text);
-			doc.insertString(doc.getLength(), "Warning: Dark mode is in beta without support for charts.\n", text);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
