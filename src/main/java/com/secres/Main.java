@@ -126,8 +126,10 @@ public class Main {
 		// Start placing data into graphs; all done on EDT. (Quick reads)
 		GraphCharts.updateDataBasicLineChart();
 		GraphCharts.updateDataBasicChartByYear();
-		GraphCharts.updateScatterPlotCoolingDec();
-		GraphCharts.updateScatterPlotCoolingJun();
+		GraphCharts.updateScatterPlotCoolingSeason(GraphCharts.getMarchSeries(), 2, "March", 5);
+		GraphCharts.updateScatterPlotCoolingSeason(GraphCharts.getJuneSeries(), 5, "June", 4);
+		GraphCharts.updateScatterPlotCoolingSeason(GraphCharts.getSeptemberSeries(), 8, "September", 6);
+		GraphCharts.updateScatterPlotCoolingSeason(GraphCharts.getDecemberSeries(), 11, "December", 3);
 		GraphCharts.updateBasicBarChartByCountry();
 		GraphCharts.updateDoubleBarChartByCountry();
 		GraphCharts.updateMultiXYLineChartByEconomy();
@@ -161,6 +163,7 @@ public class Main {
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
 		// Mac header on mac menubar
 		System.setProperty("apple.awt.application.name", "Secres");
+		System.setProperty("apple.awt.application.appearance", "system");
 		// Acceleration of graphics, should ONLY be used by developers
 		//System.setProperty("apple.awt.graphics.EnableQ2DX","true");
 		System.setProperty("apple.awt.antialiasing", "true");

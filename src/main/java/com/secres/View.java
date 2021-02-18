@@ -69,8 +69,8 @@ public class View {
 	private final String ALLLINEPANEL = "Card with Basic Line Chart";
 	private final String AVGLINEPANEL = "Card with Average Temperature Line Chart";
 	private final String AVGSCATTERPANEL = "Card with Average Temperature Scatter Plot";
-	private final String DECSCATTERPANEL = "Card with Temperatures from December Scatter Plot";
-	private final String JUNSCATTERPANEL = "Card with Temperatures from June Scatter Plot";
+	private final String SEASONPANEL = "Card with Temperatures from Seasons Scatter Plot";
+	private final String THERMOMETERPANEL = "Card with Temperatures from Averages into Thermometer";
 	private final String AVGBARPANEL = "Card with Average Temperature Bar Chart";
 	private final String DOUBLEBARGREATESTPANEL = "Card with Most Difference in a century Bar Chart";
 	private final String DOUBLEBARLEASTPANEL = "Card with Least Difference in a century Bar Chart";
@@ -83,7 +83,7 @@ public class View {
 	private JTree componentTree;
 	private DefaultMutableTreeNode root, dataRootNode, globalTableNode, countryTableNode;
 	private DefaultMutableTreeNode graphRootNode;
-	private DefaultMutableTreeNode globalNode, basicLineNode, basicLineByYearNode, basicScatterByYearNode, basicScatterCoolingDecNode, basicScatterCoolingJunNode;
+	private DefaultMutableTreeNode globalNode, basicLineNode, basicLineByYearNode, basicScatterByYearNode, basicScatterCoolingNode, thermometerSlideNode;
 	private DefaultMutableTreeNode countryNode, basicBarNode, doubleBarGreatestNode, doubleBarLeastNode, multiLineEconomyNode;
 	
 	/** <code>JTable</code> data */
@@ -302,13 +302,13 @@ public class View {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, AVGSCATTERPANEL);
 				}
-				else if(node == basicScatterCoolingDecNode) {
+				else if(node == basicScatterCoolingNode) {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
-				    cl.show(cardsPanel, DECSCATTERPANEL);
+				    cl.show(cardsPanel, SEASONPANEL);
 				}
-				else if(node == basicScatterCoolingJunNode) {
+				else if(node == thermometerSlideNode) {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
-				    cl.show(cardsPanel, JUNSCATTERPANEL);
+				    cl.show(cardsPanel, THERMOMETERPANEL);
 				}
 				else if(node == basicBarNode) {
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
@@ -424,12 +424,12 @@ public class View {
 	    cardsPanel.add(GraphCharts.basicLineChart(), ALLLINEPANEL);
 	    cardsPanel.add(GraphCharts.basicLineChartByYear(), AVGLINEPANEL);
 	    cardsPanel.add(GraphCharts.basicScatterPlotByYear(), AVGSCATTERPANEL);
-	    cardsPanel.add(GraphCharts.basicScatterPlotCoolingDec(), DECSCATTERPANEL);
-	    cardsPanel.add(GraphCharts.basicScatterPlotCoolingJun(), JUNSCATTERPANEL);
+	    cardsPanel.add(GraphCharts.thumbnailScatterSeason(), SEASONPANEL);
 	    cardsPanel.add(GraphCharts.basicBarChartByCountry(), AVGBARPANEL);
 	    cardsPanel.add(GraphCharts.doubleBarChartByCountryGreatest(), DOUBLEBARGREATESTPANEL);
 	    cardsPanel.add(GraphCharts.doubleBarChartByCountryLeast(), DOUBLEBARLEASTPANEL);
 	    cardsPanel.add(GraphCharts.multiXYLineChartByEconomy(), MULTILINEECONOMYPANEL);
+	    cardsPanel.add(GraphCharts.thermometerChartAverage(), THERMOMETERPANEL);
 		
 		graphPanel.add(cardsPanel);
 		
@@ -465,10 +465,10 @@ public class View {
 		globalNode.add(basicLineByYearNode);
 		basicScatterByYearNode = new DefaultMutableTreeNode("Scatter Plot By Year");
 		globalNode.add(basicScatterByYearNode);
-		basicScatterCoolingDecNode = new DefaultMutableTreeNode("Scatter Plot In December");
-		globalNode.add(basicScatterCoolingDecNode);
-		basicScatterCoolingJunNode = new DefaultMutableTreeNode("Scatter Plot In June");
-		globalNode.add(basicScatterCoolingJunNode);
+		basicScatterCoolingNode = new DefaultMutableTreeNode("Scatter Plot By Season");
+		globalNode.add(basicScatterCoolingNode);
+		thermometerSlideNode = new DefaultMutableTreeNode("Thermometer Averages");
+		globalNode.add(thermometerSlideNode);
 		
 		countryNode = new DefaultMutableTreeNode("Country Data Graphs");
 		basicBarNode = new DefaultMutableTreeNode("Bar Chart By Country");
