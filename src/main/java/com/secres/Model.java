@@ -4,15 +4,8 @@ import com.opencsv.*;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
-
-import javax.swing.JOptionPane;
-import javax.swing.RepaintManager;
-import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
-
-import org.jfree.chart.JFreeChart;
 
 /**
  * The <code>Model</code> class defines all I/O from the CSV files.

@@ -3,15 +3,9 @@ package com.secres;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import javax.swing.*;
-
-import org.jfree.chart.JFreeChart;
 
 import com.formdev.flatlaf.*;
 
@@ -121,18 +115,24 @@ public class Main {
 		return modelCountry;
 	}
 	
-	/** Notifier method that last {@link Model} has finished read. */
+	/**
+	 * 1. Notifier method that the last {@link Model} has finished read.
+	 * <br>
+	 * 2. Initializes the model of all charts.
+	 * <br>
+	 * 3. Shows application and disposes splash screen.
+	 */
 	static void verifyReadFinished() {
 		// Start placing data into graphs; all done on EDT. (Quick reads)
-		GraphCharts.updateDataBasicLineChart();
-		GraphCharts.updateDataBasicChartByYear();
-		GraphCharts.updateScatterPlotCoolingSeason(GraphCharts.getMarchSeries(), 2, "March", 5);
-		GraphCharts.updateScatterPlotCoolingSeason(GraphCharts.getJuneSeries(), 5, "June", 4);
-		GraphCharts.updateScatterPlotCoolingSeason(GraphCharts.getSeptemberSeries(), 8, "September", 6);
-		GraphCharts.updateScatterPlotCoolingSeason(GraphCharts.getDecemberSeries(), 11, "December", 3);
-		GraphCharts.updateBasicBarChartByCountry();
-		GraphCharts.updateDoubleBarChartByCountry();
-		GraphCharts.updateMultiXYLineChartByEconomy();
+		GraphCharts.getBasicLineChart().updateModel();
+		GraphCharts.getAvgChart().updateModel();
+		GraphCharts.getSeasonsCharts().updateModel(GraphCharts.getSeasonsCharts().getMarchSeries(), 2, "March", 2);
+		GraphCharts.getSeasonsCharts().updateModel(GraphCharts.getSeasonsCharts().getJuneSeries(), 5, "June", 1);
+		GraphCharts.getSeasonsCharts().updateModel(GraphCharts.getSeasonsCharts().getSeptemberSeries(), 8, "September", 3);
+		GraphCharts.getSeasonsCharts().updateModel(GraphCharts.getSeasonsCharts().getDecemberSeries(), 11, "December", 0);
+		GraphCharts.getBarChart().updateModel();
+		GraphCharts.getBarChartChange().updateModel();
+		GraphCharts.getEconomyChart().updateModel();
 		
 		Main.getSplash().dispose();
 		View.getFrame().setVisible(true);

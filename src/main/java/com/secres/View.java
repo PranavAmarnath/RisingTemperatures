@@ -5,8 +5,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -18,15 +16,12 @@ import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
-
-import org.jfree.chart.StandardChartTheme;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -154,14 +149,6 @@ public class View {
 				} catch (UnsupportedLookAndFeelException e1) {
 					e1.printStackTrace();
 				}
-				/*// causes series paint to go back to default
-				SwingUtilities.updateComponentTreeUI(frame);
-				for(int i = 0; i < GraphCharts.charts.length; i++) {
-					try {
-						themeLight.apply(GraphCharts.charts[i]);
-					} catch(Exception e1) { }
-				}
-				*/
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
@@ -183,14 +170,6 @@ public class View {
 						UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
 					} catch (Exception e2) {}
 				}
-				/*// causes series paint to go back to default
-				SwingUtilities.updateComponentTreeUI(frame);
-				for(int i = 0; i < GraphCharts.charts.length; i++) {
-					try {
-						themeLight.apply(GraphCharts.charts[i]);
-					} catch(Exception e1) { }
-				}
-				*/
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
@@ -207,14 +186,6 @@ public class View {
 				} catch (Exception e3) {
 					e3.printStackTrace();
 				}
-				/*// causes series paint to go back to default
-				SwingUtilities.updateComponentTreeUI(frame);
-				for(int i = 0; i < GraphCharts.charts.length; i++) {
-					try {
-						themeLight.apply(GraphCharts.charts[i]);
-					} catch(Exception e1) { }
-				}
-				*/
 				SwingUtilities.updateComponentTreeUI(frame);
 			}
 		});
@@ -256,16 +227,6 @@ public class View {
 			}
 		});
 		
-		/*
-		JButton helpButton = new JButton();
-		helpButton.setToolTipText("Help");
-		helpButton.putClientProperty("JButton.buttonType", "help");
-		helpButton.setMaximumSize(new Dimension(10, 10));
-		JToolBar toolBar = new JToolBar();
-		toolBar.add(helpButton);
-		frame.add(toolBar, BorderLayout.NORTH);
-		*/
-		
 		mainPanel = new JPanel(new BorderLayout());
 		frame.add(mainPanel);
 		
@@ -281,12 +242,10 @@ public class View {
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) componentTree.getLastSelectedPathComponent();
 				componentTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 				if(node == globalTableNode) {
-					//System.out.println("Table will be shown!");
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, TABLEGLOBALPANEL);
 				}
 				else if(node == countryTableNode) {
-					//System.out.println("Table will be shown!");
 					CardLayout cl = (CardLayout)(cardsPanel.getLayout());
 				    cl.show(cardsPanel, TABLECOUNTRYPANEL);
 				}
@@ -344,19 +303,6 @@ public class View {
 		tableGlobalPanel = new JPanel(new BorderLayout());
 		tableCountryPanel = new JPanel(new BorderLayout());
 		
-		/** Reference: @see https://stackoverflow.com/a/5630271/13772184 */
-		/*// Start citation
-		String[] header = {"Name", "Value"};
-        String[] a = new String[0];
-        String[] names = System.getProperties().stringPropertyNames().toArray(a);
-        String[][] data = new String[names.length][2];
-        for (int ii=0; ii<names.length; ii++) {
-            data[ii][0] = names[ii];
-            data[ii][1] = System.getProperty(names[ii]);
-        }
-        DefaultTableModel model = new DefaultTableModel(data, header);
-        // end citation */
-		
 		tableGlobalData = new JTable(Main.getGlobalModel().getModel()) {
 			@Override
 			public boolean isCellEditable(int row, int column) {  
@@ -370,9 +316,7 @@ public class View {
 				return false;
 			}
 		};
-		//System.out.println("Reached second table.");
 		
-		///*
 		tableGlobalData.setCellSelectionEnabled(true);
 		tableGlobalData.setToolTipText("<html>Display of CSV Data in Table format.<br>Double-click/CTRL+C on a cell to copy text.</html>");
         tableGlobalData.addMouseListener(new MouseAdapter() {
@@ -389,7 +333,6 @@ public class View {
 		        handleCopy(tableCountryData, e);
 		    }
 		});
-		//*/
 		
 		tableGlobalScroll = new JScrollPane(tableGlobalData);
 		//tableGlobalScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -407,8 +350,6 @@ public class View {
 		tableCountryPanel.add(tableCountryScroll);
 		
 		emptyPanel = new JPanel(new BorderLayout());
-		//emptyPanel.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220), 1));
-		//emptyPanel.setBackground(Color.WHITE);
 		JLabel emptyLabel = new JLabel("Click nodes on the left to display items.", JLabel.CENTER);
 		emptyLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
 		emptyLabel.setForeground(new Color(150, 150, 150));
@@ -421,15 +362,15 @@ public class View {
 		//System.out.println(SwingUtilities.isEventDispatchThread());
 	    cl.show(cardsPanel, EMPTYPANEL);
 		
-	    cardsPanel.add(GraphCharts.basicLineChart(), ALLLINEPANEL);
-	    cardsPanel.add(GraphCharts.basicLineChartByYear(), AVGLINEPANEL);
-	    cardsPanel.add(GraphCharts.basicScatterPlotByYear(), AVGSCATTERPANEL);
-	    cardsPanel.add(GraphCharts.thumbnailScatterSeason(), SEASONPANEL);
-	    cardsPanel.add(GraphCharts.basicBarChartByCountry(), AVGBARPANEL);
-	    cardsPanel.add(GraphCharts.doubleBarChartByCountryGreatest(), DOUBLEBARGREATESTPANEL);
-	    cardsPanel.add(GraphCharts.doubleBarChartByCountryLeast(), DOUBLEBARLEASTPANEL);
-	    cardsPanel.add(GraphCharts.multiXYLineChartByEconomy(), MULTILINEECONOMYPANEL);
-	    cardsPanel.add(GraphCharts.thermometerChartAverage(), THERMOMETERPANEL);
+	    cardsPanel.add(GraphCharts.getBasicLineChart().updateView(), ALLLINEPANEL);
+	    cardsPanel.add(GraphCharts.getAvgChart().updateViewLine(), AVGLINEPANEL);
+	    cardsPanel.add(GraphCharts.getAvgChart().updateViewScatter(), AVGSCATTERPANEL);
+	    cardsPanel.add(GraphCharts.getSeasonsCharts().updateView(), SEASONPANEL);
+	    cardsPanel.add(GraphCharts.getBarChart().updateView(), AVGBARPANEL);
+	    cardsPanel.add(GraphCharts.getBarChartChange().updateViewGreatest(), DOUBLEBARGREATESTPANEL);
+	    cardsPanel.add(GraphCharts.getBarChartChange().updateViewLeast(), DOUBLEBARLEASTPANEL);
+	    cardsPanel.add(GraphCharts.getEconomyChart().updateView(), MULTILINEECONOMYPANEL);
+	    cardsPanel.add(GraphCharts.getThermometerChart().updateView(), THERMOMETERPANEL);
 		
 		graphPanel.add(cardsPanel);
 		
@@ -440,8 +381,6 @@ public class View {
 		frame.pack();
 		splitPane.setResizeWeight(0.25);
 		splitPane.setDividerLocation(0.25);
-		//frame.setLocationByPlatform(true);
-		//frame.setVisible(true);
 	}
 	
 	/**	@return The <code>DefaultMutableTreeNode</code> for the <code>JTree</code> */
