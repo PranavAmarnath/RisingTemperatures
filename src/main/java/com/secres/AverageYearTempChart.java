@@ -106,7 +106,7 @@ JPanel updateViewLine() {
 			}
 		}
 	});
-	JCheckBox showInterval = new JCheckBox("Show Interval (Trends)");
+	JCheckBox showInterval = new JCheckBox("Show Interval");
 	showInterval.setSelected(true);
 	showInterval.addItemListener(new ItemListener() {
 		public void itemStateChanged(ItemEvent e) {
@@ -164,7 +164,7 @@ JPanel updateViewScatter() {
 	JPanel mainPanel = new JPanel(new BorderLayout());
 	mainPanel.add(panel2);
 	
-	JCheckBox showInterval = new JCheckBox("Show Interval");
+	JCheckBox showInterval = new JCheckBox("Show Interval (Trends)");
 	showInterval.setSelected(true);
 	showInterval.addItemListener(new ItemListener() {
 		public void itemStateChanged(ItemEvent e) {

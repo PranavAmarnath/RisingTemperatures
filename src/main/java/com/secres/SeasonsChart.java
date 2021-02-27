@@ -123,18 +123,21 @@ public class SeasonsChart extends AbstractGraph {
 		
 		JPanel returnHomePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		JButton previous = new JButton("<< Back");
+		previous.setToolTipText("Previous season");
 		returnHomePanel.add(previous);
 		previous.addActionListener(e -> {
 			CardLayout cl = (CardLayout)(seasonsPanel.getLayout());
 			cl.previous(seasonsPanel);
 		});
 		JButton returnHome = new JButton("Home");
+		returnHome.setToolTipText("Home screen");
 		returnHomePanel.add(returnHome);
 		returnHome.addActionListener(e -> {
 			CardLayout cl = (CardLayout)(seasonsPanel.getLayout());
 		    cl.show(seasonsPanel, "Home Page");
 		});
 		JButton next = new JButton("Next >>");
+		next.setToolTipText("Next season");
 		returnHomePanel.add(next);
 		next.addActionListener(e -> {
 			CardLayout cl = (CardLayout)(seasonsPanel.getLayout());
