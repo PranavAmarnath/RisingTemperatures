@@ -13,9 +13,9 @@ Note: Fork of `Model` class architecture (PoC): [SecresCSV](https://github.com/P
 * Dependency Management/Build Automation:
   * Eclipse with Maven
   * Dependencies:
-    * JFreeChart
-    * FlatLaf
-    * OpenCSV
+    * [JFreeChart](https://www.jfree.org/jfreechart/)
+    * [FlatLaf](https://www.formdev.com/flatlaf/)
+    * [OpenCSV](http://opencsv.sourceforge.net/)
   * Git to manage workflow
   * After every build, commit to git remote repo
 * Wrapping Build with Installer:
