@@ -1,6 +1,6 @@
 # RisingTemperatures
 A Java application for analyzing climate change CSV data.<p>
-Note: Fork of `Model` class architecture (PoC): [SecresCSV](https://github.com/PranavAmarnath/SecresCSV) - A GUI for opening/viewing, editing, and/or saving (beta) multiple CSV files at a time in tabular format.
+Note: Fork of `Model` class architecture (PoC): [SecresCSV](https://github.com/PranavAmarnath/SecresCSV) - A GUI for opening/viewing, editing, printing, and/or saving (beta) multiple CSV files at a time in tabular format.
 
 ![image](https://user-images.githubusercontent.com/64337291/110227837-187ba680-7eb1-11eb-9aca-db3376051565.png)
 
@@ -54,7 +54,7 @@ Note: Fork of `Model` class architecture (PoC): [SecresCSV](https://github.com/P
   * Effects: Rising temperatures, more droughts, intense hurricanes
   
 ## Future Applications/Research
-* Fork of `Model` class architecture (PoC): [SecresCSV](https://github.com/PranavAmarnath/SecresCSV) - A GUI for opening/viewing, editing, and/or saving (beta) multiple CSV files at a time in tabular format.
+* Fork of `Model` class architecture (PoC): [SecresCSV](https://github.com/PranavAmarnath/SecresCSV) - A GUI for opening/viewing, editing, printing, and/or saving (beta) multiple CSV files at a time in tabular format.
 * Models calculated (linear & power) can be applied for future predictions - Ex. heatmap overlay from 2020-2030
 * Future projects could fork and easily add new visualizations based on existing architecture (add new class that extends `AbstractGraph` with model and view methods, create instance in GraphCharts and coordinate with `View` class
 * Applying sorting and filtering algorithms could prove useful in future charts/maps etc.
