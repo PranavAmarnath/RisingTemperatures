@@ -1,6 +1,6 @@
 # RisingTemperatures
 A Java application for analyzing climate change CSV data.<p>
-Note: Fork of `Model` class architecture (PoC): [SecresCSV](https://github.com/PranavAmarnath/SecresCSV) - A GUI for opening/viewing, editing, printing, and/or saving (beta) multiple CSV files at a time in tabular format.
+Note: Fork of `Model` class architecture (PoC): [SecresCSV](https://github.com/PranavAmarnath/SecresCSV) - A GUI for opening/viewing, saving, printing, editing and/or refreshing multiple CSV files at a time in tabular format.
 
 ![image](https://user-images.githubusercontent.com/64337291/110227837-187ba680-7eb1-11eb-9aca-db3376051565.png)
 
